@@ -191,12 +191,19 @@ td:last-child {
             const indicators = getIndicators();
             indicators.push(newIndicator);
             
-            localStorage.setItem(INDICATORS_KEY, JSON.stringify(indicators));
+            // ... ภายใน function addIndicator()
+    // ...
+    localStorage.setItem(INDICATORS_KEY, JSON.stringify(indicators));
 
-            alert(`บันทึกตัวชี้วัด "${name}" เรียบร้อยแล้ว!`);
-            document.getElementById('indicatorSetupForm').reset(); 
-            loadIndicators(); 
-        }
+    alert(`บันทึกตัวชี้วัด "${name}" เรียบร้อยแล้ว!`);
+    
+    loadIndicators(); // โหลดก่อน
+
+    // ✅ Reset Form ที่ด้านล่าง
+    document.getElementById('indicatorName').value = '';
+    document.getElementById('indicatorTarget').value = '';
+    document.getElementById('indicatorDueDate').value = '';
+}
 
         // --- 3. ฟังก์ชันคำนวณ Progress และ Trend Display ---
         function calculateProgressDisplay(indicator) {
