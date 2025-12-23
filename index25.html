@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* [ส่วน CSS เดิมของคุณป๊อป] */
+        :root { --primary: #1a73e8; --bg: #f0f2f5; --sidebar-w: 260px; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Styles */
+        .sidebar { width: var(--sidebar-w); background: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; padding: 20px 0; transition: transform 0.3s; z-index: 1000; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background-color: #ddd; border-radius: 4px; }
+        
+        .app-brand { padding: 0 20px 20px; border-bottom: 1px solid #eee; margin-bottom: 10px; flex-shrink: 0; }
+        .app-brand h2 { margin: 0; color: var(--primary); font-size: 1.1rem; line-height: 1.5; display: flex; align-items: center; gap: 10px; }
+        
+        .menu-item { padding: 12px 20px; cursor: pointer; color: #555; display: flex; align-items: center; gap: 12px; text-decoration: none; transition: 0.2s; font-weight: 500; flex-shrink: 0; }
+        .menu-item:hover { background: #f5f9ff; color: var(--primary); }
+        .menu-item.active { background: #e8f0fe; color: var(--primary); border-right: 3px solid var(--primary); }
+        .menu-item i { width: 24px; text-align: center; }
+        
+        /* Sidebar Footer */
+        .sidebar-footer { margin-top: auto; padding: 20px; border-top: 1px solid #eee; background: #fdfdfd; flex-shrink: 0; }
+        .doc-item { margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .doc-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .doc-name { font-size: 0.85rem; color: #555; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+        .doc-running-row { display: flex; align-items: center; gap: 5px; font-size: 1.2rem; font-weight: bold; color: #333; padding-left: 24px; }
+        .year-select-inline { font-size: 0.9rem; font-weight: bold; color: #1a73e8; border: 1px solid #dcebfd; background: #f5f9ff; border-radius: 4px; padding: 2px 5px; cursor: pointer; outline: none; }
+        
+        /* ปุ่มบวกเลขรัน */
+        .btn-plus-run { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; margin-left: 5px; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .btn-plus-run:hover { background: #1a73e8; color: white; transform: scale(1.1); }
+        .btn-plus-run:active { transform: scale(0.9); }
+        
+        /* ช่องกรอกเลขรัน (Input) */
+        .run-input { width: 50px; text-align: right; border: none; background: transparent; font-size: 1.3rem; font-weight: bold; font-family: inherit; color: inherit; border-bottom: 1px dashed transparent; transition: 0.2s; padding: 0; }
+        .run-input:hover, .run-input:focus { border-bottom: 1px dashed #aaa; outline: none; background: #fff; }
+        .run-input::-webkit-outer-spin-button, .run-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* Content Styles */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+        .page-section { display: none; animation: fadeIn 0.3s; padding-bottom: 80px; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+        
+        .menu-toggle { display: none; position: fixed; top: 15px; left: 15px; z-index: 2000; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 5px; cursor: pointer; }
+        
+        /* Grid & Cards (ใช้ของเดิมผสม Grid ใหม่) */
+        .home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .link-card { background: #fff; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-decoration: none; color: #333; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
+        .link-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .link-card i { font-size: 2.5rem; margin-bottom: 5px; }
+        .link-card h3 { margin: 0; font-size: 1.1rem; }
+        .link-card p { margin: 0; font-size: 0.85rem; color: #888; }
+        .ic-pm { color: #ea4335; } .ic-map { color: #34a853; } .ic-web { color: #1a73e8; } .ic-drive { color: #fbbc04; }
+        .img-section { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
+        .img-section img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #eee; }
+        
+        /* Board Styles */
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; align-items: start; }
+        .column { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; }
+        .col-header { font-weight: bold; padding: 10px 15px; color: white; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; }
+        .btn-head-add { background: rgba(255,255,255,0.25); border: none; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .btn-head-add:hover { background: rgba(255,255,255,0.5); transform: scale(1.1); }
+        .head-clinic { background: #29b6f6; } .head-pollution { background: #4caf50; } .head-prevent { background: #ec407a; color: white !important; } .head-prevent .btn-head-add { background: rgba(255,255,255,0.25); color:white; } .head-checkup { background: #1565c0; } .head-hospital { background: #ef5350; } .head-center { background: #ab47bc; } 
+        
+        .sub-section { padding: 10px; min-height: 100px; display:flex; flex-direction:column; flex-grow:1; }
+        .section-kpi { background-color: #f8fbfd; border-top: 2px dashed #dcebfd; }
+        .section-title { font-size: 0.85rem; font-weight: bold; color: #888; margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; gap: 5px; cursor: pointer; user-select: none; }
+        .section-title:hover { color: var(--primary); }
+        .section-title i { transition: transform 0.3s; }
+        .section-title.collapsed i { transform: rotate(-90deg); }
+        
+        /* Card Styles Updated (Compact Mode) */
+        .card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s; position: relative; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-color: #ccc; }
+        .card.done { background: #d4edda !important; border: 1px solid #c3e6cb; border-left: 5px solid #28a745 !important; color: #155724; opacity: 0.7; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .card.done .task-title { text-decoration: line-through; color: #155724; font-weight: normal; margin: 0; }
+        .card.done i.fa-check-circle { color: #28a745; font-size: 1.2rem; margin-right: 8px; }
+        .card.done:hover { opacity: 1; transform: scale(1.02); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .task-title { font-weight: bold; font-size: 14px; color: #333; margin-bottom: 2px; line-height: 1.2; }
+        .task-meta { font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; min-height: auto; }
+        .badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
+        .badge.urgent { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; } 
+        .badge.ok { background: #e8f5e9; color: #2e7d32; } 
+        .badge.daily { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        
+        .progress-cont { background: #e9ecef; border-radius: 7px; height: 14px; width: 100%; overflow: hidden; margin: 4px 0; position: relative; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.6s ease; display: flex; align-items: center; justify-content: center; background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); background-size: 1rem 1rem; }
+        .progress-text { position: absolute; width: 100%; text-align: center; top: 0; font-size: 0.65rem; font-weight: bold; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); z-index: 2; line-height: 14px; }
+        .bg-danger { background-color: #dc3545; } .bg-warning { background-color: #ffc107; } .bg-success { background-color: #28a745; }
+        
+        .num-control { display: flex; gap: 2px; align-items: center; margin-top: 2px; }
+        .num-input { width: 50px; height: 24px; padding: 0 5px; text-align: center; border: 1px solid #ddd; border-radius: 4px; font-weight: bold; background: #f8f9fa; font-size: 0.9rem; }
+        .num-total { font-size: 0.85rem; color: #999; white-space: nowrap; font-weight: normal; }
+        
+        .checklist-item { font-size: 0.8rem; padding: 0; cursor: pointer; display: flex; gap: 6px; align-items: center; }
+        .checklist-item.checked span { text-decoration: line-through; color: #aaa; }
+        .checklist-item i { font-size: 0.9rem; }
+        
+        .card-actions { border-top: 1px solid #eee; margin-top: 4px; padding-top: 4px; display: flex; justify-content: space-between; align-items: center;}
+        .btn-icon { background: none; border: 1px solid transparent; cursor: pointer; color: #666; font-size: 0.75rem; padding: 1px 6px; border-radius: 4px; display: flex; align-items: center; gap: 4px; }
+        .btn-icon:hover { background: #eee; }
+        .btn-finish { color: #34a853; } .btn-restart { color: #fbbc04; background:#fff8e1; } .btn-remove { color: #ea4335; background:#fce8e6; } .btn-upload { color: #1a73e8; } 
+        .has-file { background-color: #e8f0fe; color: #1a73e8; border-color: #d2e3fc; } 
+        .btn-mini { border: none; padding: 0; border-radius: 4px; cursor: pointer; font-weight: bold; height: 24px; width: 24px; line-height: 22px; font-size: 0.8rem; }
+        
+        .task-content-scroll { margin-bottom: 2px; }
+        
+        /* Badge NEW */
+        .badge-new { background-color: #ff4757; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; margin-left: 8px; box-shadow: 0 2px 5px rgba(255, 71, 87, 0.4); display: inline-block; animation: pulse-red 1.5s infinite; vertical-align: middle; }
+        @keyframes pulse-red { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 71, 87, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); } }
+        
+        /* Contact Table */
+        .contact-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .contact-table th, .contact-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        .contact-table th { background: #f8f9fa; color: #666; font-weight: bold; }
+        .contact-row:hover { background: #f8fbfd; }
+        .search-box { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; margin-bottom: 0; box-sizing: border-box; }
+        .contact-actions { display: flex; gap: 8px; }
+        .btn-contact { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+        .btn-edit { background: #e8f0fe; color: #1a73e8; } .btn-delete { background: #fce8e6; color: #ea4335; }
+        
+        /* Modal General */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 15px; max-height: 90vh; overflow-y: auto; }
+        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-act { width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; background: #1a73e8; margin-top: 5px; }
+        .checklist-input-group { display: flex; gap: 5px; margin-bottom: 10px; align-items: center; }
+        .checklist-display { border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #f8f9fa; max-height: 150px; overflow-y: auto; margin-bottom: 15px; }
+        .cl-item-row { background: #fff; border: 1px solid #eee; padding: 8px 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-cl-del { color: #ea4335; cursor: pointer; background: none; border: none; font-size: 0.9rem; }
+        .btn-cl-del:hover { color: #c62828; transform: scale(1.2); }
+        .cl-placeholder { text-align: center; color: #aaa; font-size: 0.85rem; padding: 10px; }
+        
+        .section-separator { display: flex; align-items: center; gap: 10px; margin: 30px 0 20px; }
+        .section-separator h3 { margin: 0; color: #555; white-space: nowrap; }
+        .section-separator hr { width: 100%; border: 0; border-top: 2px solid #e0e0e0; }
+        .btn-refresh { background: #f1f3f4; border: 1px solid #dadce0; color: #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; white-space: nowrap; }
+        .btn-refresh:hover { background: #e8eaed; color: #333; }
+        
+        .header-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 0; }
+        .header-group h1 { margin: 0; }
+        .shift-badge { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; padding: 5px 15px; border-radius: 20px; font-size: 1.2rem; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .shift-badge:hover { background: #ffe0b2; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .project-col-header { background: #3f51b5; color: white; padding: 12px 15px; font-weight: bold; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;}
+        .owner-badge { font-size: 0.75rem; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 12px; display: inline-block; margin-bottom: 5px; font-weight: bold; border: 1px solid #bbdefb; margin-right:4px;}
+        
+        .calendar-modal-content { max-width: 900px; width: 95%; height: 85vh; padding: 0; overflow: hidden; display: flex; flex-direction: column; background: #fff; }
+        .modal-close-bar { padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .calendar-frame-container { flex: 1; width: 100%; background: #fff; position: relative; }
+        .calendar-frame-container iframe { width: 100%; height: 100%; border: 0; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -260px; height: 100%; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+            .sidebar.show { left: 0; } .menu-toggle { display: block; } .board { grid-template-columns: 1fr; } .column { margin-bottom: 20px; } .main-content { padding-top: 60px; } .tool-bar { flex-direction: column; }
+            .header-group { gap: 10px; } .shift-badge { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+  <div id="loginScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(50,54,57,0.95); z-index:99999; display:flex; justify-content:center; align-items:center;">
+        <div class="card" style="background:white; padding:40px; border-radius:15px; text-align:center; width:350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="font-size:3rem; margin-bottom:10px;">🔐</div>
+            <h3 style="margin:0 0 20px 0; color:#333;">กรุณาระบุรหัสผ่าน</h3>
+            
+            <input type="password" id="txtAppPassword" class="form-control" placeholder="Enter Password" style="margin-bottom:20px; text-align:center; font-size:1.2rem;">
+            
+            <button type="button" class="btn-act" onclick="doAppLogin()" style="width:100%; justify-content:center; font-size:1.1rem;">
+                เข้าสู่ระบบ
+            </button>
+        </div>
+    </div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="app-brand">
+            <h2><i class="fas fa-briefcase-medical"></i> Occ-Health <br><span style="font-size:0.9rem; color:#666;">Data Hub</span></h2>
+        </div>
+        
+        <div class="menu-item active" onclick="switchPage('home', this)"><i class="fas fa-home"></i> หน้าแรก</div>
+        <div class="menu-item" onclick="switchPage('kpi', this)"><i class="fas fa-chart-line"></i> ติดตาม KPI</div>
+        <div class="menu-item" onclick="switchPage('projects', this)"><i class="fas fa-project-diagram"></i> ติดตามโครงการ</div>
+        <div class="menu-item" onclick="switchPage('occ-info', this)"><i class="fas fa-book-medical"></i> ข้อมูลด้านอาชีวเวชกรรม</div>
+        <div class="menu-item" onclick="openCalendarModal()"><i class="fas fa-calendar-alt"></i> ปฏิทินงาน</div>
+        <div class="menu-item" onclick="switchPage('phonebook', this)"><i class="fas fa-address-book"></i> รายชื่อเจ้าหน้าที่</div>
+        <div class="menu-item" onclick="openPrintModal()" style="color:#e65100; background:#fff3e0; border-right:3px solid #ffb74d;"><i class="fas fa-print"></i> พิมพ์รายงานสรุป</div>
+        <div class="menu-item" onclick="window.open('https://hrh.moph.go.th/', '_blank')"><i class="fas fa-globe"></i> เว็บโรงพยาบาล</div>
+
+        <div class="sidebar-footer">
+            <h4 style="margin: 0 0 15px; font-size: 0.9rem; color: #555;">🗂️ เลขรันเอกสาร (ล่าสุด)</h4>
+            
+            <div class="doc-item">
+                <div class="doc-name"><i class="fas fa-file-invoice-dollar" style="color:#e67c73;"></i> ใบเสนอราคา</div>
+                <div class="doc-running-row">
+                    <input type="number" id="val_quotation" class="run-input" style="color:#e67c73;" onchange="manualUpdateRunNum('quotation', this.value)">
+                    <button class="btn-plus-run" onclick="incrementRunNum('quotation')"><i class="fas fa-plus"></i></button>
+                    <span style="font-size:1rem; color:#aaa; margin-left:5px;">/</span>
+                    <select class="year-select-inline"><option value="69" selected>69</option><option value="68">68</option><option value="70">70</option></select>
+                </div>
+            </div>
+
+            <div class="doc-item">
+                <div class="doc-name"><i class="fas fa-file-invoice" style="color:#33b679;"></i> ใบเรียกเก็บ</div>
+                <div class="doc-running-row">
+                    <input type="number" id="val_billing" class="run-input" style="color:#33b679;" onchange="manualUpdateRunNum('billing', this.value)">
+                    <button class="btn-plus-run" onclick="incrementRunNum('billing')"><i class="fas fa-plus"></i></button>
+                    <span style="font-size:1rem; color:#aaa; margin-left:5px;">/</span>
+                    <select class="year-select-inline"><option value="69" selected>69</option></select>
+                </div>
+            </div>
+
+            <div class="doc-item">
+                <div class="doc-name"><i class="fas fa-user-secret" style="color:#fbbc04;"></i> เคสสอบสวน</div>
+                <div class="doc-running-row">
+                    <input type="number" id="val_investigation" class="run-input" style="color:#fbbc04;" onchange="manualUpdateRunNum('investigation', this.value)">
+                    <button class="btn-plus-run" onclick="incrementRunNum('investigation')"><i class="fas fa-plus"></i></button>
+                    <span style="font-size:1rem; color:#aaa; margin-left:5px;">/</span>
+                    <select class="year-select-inline"><option value="69" selected>69</option></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="page-home" class="page-section active">
+            <div class="header-group" style="margin-bottom: 20px;">
+                <h1 style="text-align:left; font-size: 1.5rem;">🏠 ศูนย์กลางข้อมูลกลุ่มงานอาชีวเวชกรรม</h1>
+                <div class="shift-badge" onclick="openCalendarModal()">
+                    <i class="fas fa-calendar-day"></i> <span id="shiftText">เวรวันนี้ : กำลังโหลด...</span>
+                </div>
+            </div>
+            <div id="loading" style="text-align:center; margin-top:20px; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> กำลังโหลดข้อมูล...</div>
+            <div class="section-separator">
+                <h3>📊 งานประจำ (Routine)</h3>
+                <div style="display:flex; gap:10px; align-items:center;"> 
+                    <button class="btn-refresh" onclick="loadAllData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </div>
+                <hr>
+            </div>
+            <div class="board" id="boardRoutine" style="display:none;"></div>
+            <div class="section-separator"><h3>🔗 เมนูทางลัด</h3><hr></div>
+            <div class="home-grid">
+                <a href="https://occhrh-dev.github.io/infopm2.5/" target="_blank" class="link-card"><i class="fas fa-smog ic-pm"></i><h3>ระบบทำรายงาน PM 2.5</h3><p>One page รายงาน PM 2.5</p></a>
+                <a href="https://occhrh-dev.github.io/pollution-map/" target="_blank" class="link-card"><i class="fas fa-map-marked-alt ic-map"></i><h3>จัดการแผนที่</h3><p>ระบบจัดการแผนที่เหตุฉุกเฉิน</p></a>
+                <a href="https://drive.google.com/drive/folders/1iX99F94VC0q0rn3_WHYxX0Wy04t-0XMD?usp=sharing" target="_blank" class="link-card"><i class="fa-face-smile-beam"></i><h3>logo กลุ่มงาน</h3><p>logo กลุ่มงาน</p></a>
+            </div>
+            <div class="section-separator"><h3>🚨 แผนพิทักษ์ระยอง</h3><hr></div>
+            <div class="img-section"><img src="https://lh3.googleusercontent.com/d/1qFiZ3GOLXD2HTVKU4UUVBvbPIej1HE5P" alt="Emergency Plan"></div>
+            <div class="section-separator"><h3>🚨 เกณฑ์ DCIRs</h3><hr></div>
+            <div class="img-section"><img src="https://lh3.googleusercontent.com/d/1EMscfJgyM_IiHN5dsmKaP9QQUQyivTLJ" alt="DCIRs"></div>
+        </div>
+
+        <div id="page-occ-info" class="page-section">
+            <h1 style="text-align:left; margin-top:0;">📚 ข้อมูลด้านอาชีวเวชกรรม</h1>
+            
+            <div class="section-separator"><h3>🚨 แผนฉุกเฉินต่างๆ</h3><hr></div>
+            <div class="home-grid">
+                <div class="link-card" onclick="openModalImage('https://lh3.googleusercontent.com/d/17TEmrWpI_Hz7ZeX3SP-WgBgcm05OjubV')">
+                    <i class="fas fa-sitemap" style="color:#ea4335;"></i>
+                    <h3>ICS OCC</h3>
+                    <p>คลิกเพื่อดูรูป</p>
+                </div>
+                <div class="link-card" onclick="openModalImage('https://lh3.googleusercontent.com/d/1KjyLrS1mhgmFZkGyeODL1kaIwT4zd8y3')">
+                    <i class="fas fa-hospital-symbol" style="color:#ea4335;"></i>
+                    <h3>ICS โรงพยาบาล</h3>
+                    <p>คลิกเพื่อดูรูป</p>
+                </div>
+                <a href="https://drive.google.com/file/d/1_LfhLtn9yV9Mknzf8_oMBbL98ANcu6oa/view?usp=sharing" target="_blank" class="link-card"> <i class="fas fa-fire-extinguisher" style="color:#ff5722;"></i>
+                    <h3>แผนอัคคีภัย</h3>
+                    <p>แผนระงับอัคคีภัย และอพยพหนีไฟ</p>
+                </a>
+                <a href="https://drive.google.com/file/d/1T2yG9ycqc8pH8WI_JAPrC_TTwdmTETFk/view?usp=sharing" target="_blank" class="link-card"> <i class="fas fa-biohazard" style="color:#7b1fa2;"></i>
+                    <h3>แผนอุบัติภัยสารเคมี</h3>
+                    <p>แผนรองรับผู้บาดเจ็บจากอุบัติภัยสารเคมี</p>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1KIhhUi0RuNeYOUhqEnKVn4iNLrQDXFd_" target="_blank" class="link-card"> <i class="fas fa-bullhorn" style="color:#0288d1;"></i>
+                    <h3>One page สื่อสารความเสี่ยง</h3>
+                    <p>ข้อมูลสื่อสารประชาชน</p>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1vK3AE4nN-FpIH12P83z_slzKj8Azp1Ep?usp=sharing" target="_blank" class="link-card"> <i class="fas fa-folder-open" style="color:#607d8b;"></i>
+                    <h3>เอกสารที่เกี่ยวข้อง</h3>
+                    <p>เอกสารประกอบแผนฯ</p>
+                </a>
+            </div>
+
+            <div class="section-separator"><h3>🧪 ข้อมูลเกี่ยวกับสารเคมี</h3><hr></div>
+            <div class="home-grid">
+                <a href="https://drive.google.com/drive/folders/1loiYN3SJ8kv90ATF_Lg7EJHd9EiGVl5B?usp=sharing" target="_blank" class="link-card">
+                    <i class="fas fa-flask" style="color:#34a853;"></i>
+                    <h3>ข้อมูลสารเคมี (SDS)</h3>
+                    <p>ข้อมูล + Standing order</p>
+                </a>
+                <a href="https://drive.google.com/drive/folders/127fL0DajpUO3AP3j51sriWq8gaqDHL-W?usp=sharing" target="_blank" class="link-card">
+                    <i class="fas fa-exclamation-triangle" style="color:#fbbc04;"></i>
+                    <h3>HSDS</h3>
+                    <p>ข้อมูลทางด้านสุขภาพ</p>
+                </a>
+            </div>
+
+            <div class="section-separator"><h3>📝 แบบสอบสวนต่างๆ</h3><hr></div>
+            <div class="home-grid">
+                <a href="https://drive.google.com/drive/folders/1HU5zHQZvKrV3NrhFcdjD9fUQ8ePc6eC3?usp=sharing" target="_blank" class="link-card"> <i class="fas fa-balance-scale" style="color:#1a73e8;"></i>
+                    <h3>พรบ.โรคจากการประกอบอาชีพ</h3>
+                    <p>และสิ่งแวดล้อม</p>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1-4Oa2ZInS_ilcT11vttT0clqZrL0iAMv?usp=sharing" target="_blank" class="link-card">
+                    <i class="fas fa-file-medical-alt" style="color:#1a73e8;"></i>
+                    <h3>แบบสอบสวนผลกระทบ</h3>
+                    <p>ผู้ได้รับผลกระทบจากสารเคมี</p>
+                </a>
+            </div>
+
+            <div class="section-separator"><h3>📂 เอกสารอื่นๆ</h3><hr></div>
+            <div class="home-grid">
+                <a href="https://drive.google.com/drive/folders/1ZcclJQDO-X1DPHqjMjxxXrPoBav_QYEU?usp=sharing" target="_blank" class="link-card"> <i class="fas fa-file-alt" style="color:#5f6368;"></i>
+                    <h3>เอกสารอื่นๆ</h3>
+                    <p>ดาวน์โหลดเอกสารทั่วไป</p>
+                </a>
+                <a href="https://drive.google.com/drive/folders/1S8xGWf5mf_b1PKIZ0PbtFrCR3fAoZCdd" target="_blank" class="link-card"> 
+                    <i class="fas fa-history" style="color:#1976d2;"></i>
+                    <h3>รายงานการประชุมย้อนหลัง</h3>
+                    <p>เข้าดูไฟล์ใน Drive</p>
+                </a>
+            </div>
+        </div>
+
+        <div id="page-kpi" class="page-section">
+            <h1 style="text-align:left; margin-top:0;">📈 KPI Tracking</h1>
+            <div class="section-separator">
+                <h3>🏆 ตัวชี้วัดผลการดำเนินงาน</h3>
+                <button class="btn-refresh" onclick="loadAllData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <hr>
+            </div>
+            <div class="column" style="max-height:none; overflow:visible;">
+                <div class="project-col-header" style="background: #1a73e8;">
+                    <span>📋 รายการตัวชี้วัด (Sheet: KPI)</span>
+                    <button class="btn-head-add" onclick="openAddTask(null, 'ตัวชี้วัด', 'kpi')"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="sub-section" id="list-kpi-active" style="padding:15px; display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px;"></div>
+            </div>
+        </div>
+
+        <div id="page-projects" class="page-section">
+            <h1 style="text-align:left; margin-top:0;">📂 Project Tracking System</h1>
+            <div class="section-separator">
+                <h3>📊 ติดตามสถานะโครงการ</h3>
+                <button class="btn-refresh" onclick="loadAllData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <hr>
+            </div>
+            <div class="column" style="max-height:none; overflow:visible;">
+                <div class="project-col-header">
+                    <span>📋 รายการโครงการ (Sheet: Projects)</span>
+                    <button class="btn-head-add" onclick="openAddTask(null, 'General', 'project')"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="sub-section" id="list-projects-active" style="padding:15px; display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px;"></div>
+            </div>
+        </div>
+
+        <div id="modalCalendar" class="modal">
+            <div class="modal-content calendar-modal-content">
+                <div class="modal-close-bar">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span>📅 ปฏิทินงาน (รวมทั้งหมด)</span>
+                        <button class="btn-act" style="width:auto; padding:5px 10px; margin:0; font-size:0.8rem; background:#34a853;" onclick="openAddEventModal()">
+                            <i class="fas fa-plus"></i> เพิ่มลงปฏิทิน
+                        </button>
+                    </div>
+                    <button class="btn-icon" onclick="closeModal('modalCalendar')"><i class="fas fa-times"></i> ปิด</button>
+                </div>
+                <div class="calendar-frame-container">
+                    <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FBangkok&showPrint=0&src=b2NjLmhyaEBnbWFpbC5jb20&src=ZmFjZWI5MGFlNGY3MWUyNTNlNjYxMjJkY2Y1MzJiMjU0YzFmNDE2M2RiYzYzMGNjNWI4Yzc1ODAxYjc3ZjBhYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=OWY5MGI4NDgzMDMxNTZkNzdiM2FhYzI2MmQwN2IzZTMzYzhkYzg2YmI4ZGE2MzEzYTgwOWU3ZmU5ZWZlN2ZmNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NWEwMTJhNzIwZDI2YmVmN2NlYTM5MTFkOTgwZmViNDQ0NDIyMTNkZjRjYTRkMmE5MTQ1NTAxNmNlNDVmZTg5ZkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NDkxM2UwZTFiNDQxZDEyMGE0Y2UzN2ZmMTQyNjc4ZmM3NGU1NjJjNzE4NjU4YTRmZGMyNTU2YmRlYjZmZmViOUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=NWNkM2Y1YjRjNGUyMmM2YzNlYTA1MTY4MmRlN2VkNTA2ZGFlYzMwMzAxN2EzYmNkZWJhNTY4OWU2ZjZkMTJjZUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZDI0MWIzM2YzNGU5Y2JkZTQxMDI2ZmE4ZTQ1MjhmYjhjMDQ1NDliMmY3MWQ4NDQwOTUzOWRjZGMxNDMyNThiZEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ODAwOTc4NTc0YzZiNGIxOGI1MjI4ZjI1MzE4NWVlYzgwOWE3ODdiYzM5ZTFjYTM3YWExMTRkZDJmY2Q1NmY0Y0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%238e24aa&color=%233f51b5&color=%23039be5&color=%23e67c73&color=%2333b679&color=%23d50000&color=%23e4c441&color=%23a79b8e" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-phonebook" class="page-section"><h1 style="text-align:left; margin-top:0;">📞 สมุดโทรศัพท์</h1><div class="tool-bar" style="display:flex; gap:10px; margin-bottom:20px; align-items:center;"><input type="text" class="search-box" id="searchPhone" placeholder="🔍 ค้นหาชื่อ หรือ เบอร์โทร..." onkeyup="filterPhone()" style="flex:1; margin-bottom:0;"><button class="btn-act" onclick="openContactModal()" style="width:auto; margin:0; white-space:nowrap; background:#1a73e8;"><i class="fas fa-user-plus"></i> เพิ่มรายชื่อเจ้าหน้าที่</button></div><div id="phoneLoading" style="text-align:center; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> กำลังโหลดรายชื่อ...</div><table class="contact-table"><thead><tr><th>ชื่อ-สกุล</th><th>เบอร์โทร</th><th style="width:100px;">จัดการ</th></tr></thead><tbody id="phoneList"></tbody></table></div>
+    </div>
+
+    <div id="modalImage" class="modal" onclick="closeModal('modalImage')">
+        <div class="modal-content" style="width:auto; max-width:90%; background:transparent; box-shadow:none; padding:0;">
+            <img id="imgPreview" src="" style="width:100%; border-radius:8px; border:2px solid #fff;">
+        </div>
+    </div>
+
+    <div id="modalAdd" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;" id="taskModalTitle">📝 เพิ่มงานใหม่</h3>
+        <form id="addTaskForm">
+            <input type="hidden" id="tId"><input type="hidden" id="tMode">
+            
+            <div id="form-task-only">
+                <label>กลุ่มงาน</label>
+                <select id="tCat">
+                    <option value="งานคลินิก">งานคลินิก</option>
+                    <option value="งานมลพิษ">งานมลพิษ</option>
+                    <option value="งานอาชีวฯป้องกัน">งานอาชีวฯป้องกัน</option>
+                    <option value="งาน Check Up">งาน Check Up</option>
+                    <option value="งานอาชีวฯในโรงพยาบาล">งานอาชีวฯในโรงพยาบาล</option>
+                    <option value="ศูนย์เชี่ยวชาญฯ">ศูนย์เชี่ยวชาญฯ</option>
+                </select>
+
+                <input type="hidden" id="tClass" value="งานประจำ">
+            </div>
+
+                <div id="form-project-only" style="display:none; background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:15px;">
+                    
+                    <div id="divKpi" style="display:none; background:#fff; padding:10px; border-radius:8px; margin-bottom:10px; border:1px dashed #aec4e5;">
+                        <label style="color:#1967d2;">📌 ชื่อการประเมิน</label>
+                        <input type="text" id="tKpiSource" placeholder="เช่น HA-2025">
+                    </div>
+
+                    <label>👥 ทีมผู้รับผิดชอบ (สูงสุด 3 คน)</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                        <select id="tOwner" class="owner-select" style="width:100%;"><option value="">-- เลือกคนที่ 1 --</option></select>
+                        <select id="tOwner2" class="owner-select" style="width:100%;"><option value="">-- เลือกคนที่ 2 (ถ้ามี) --</option></select>
+                        <select id="tOwner3" class="owner-select" style="width:100%;"><option value="">-- เลือกคนที่ 3 (ถ้ามี) --</option></select>
+                    </div>
+                </div>
+
+                <label id="lblTitle">ชื่องาน</label><input type="text" id="tTitle" placeholder="ระบุชื่อ..." required>
+                <label>กำหนดส่ง</label><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;"><input type="checkbox" id="chkDaily" onchange="togDate()" style="width: auto; margin: 0; cursor: pointer;"><span style="color: #333; cursor: pointer;" onclick="document.getElementById('chkDaily').click()">รายงานประจำวัน</span></div><input type="date" id="tDate">
+                <div id="form-measure-type"><label>รูปแบบวัดผล</label><select id="tType" onchange="togInp()"><option value="number">📊 แบบนับจำนวน</option><option value="checklist">✅ แบบ Checklist</option></select></div>
+                <input type="number" id="tTarNum" placeholder="เป้าหมาย (ตัวเลข)"><div id="divChecklistControl" style="display:none;"><label id="lblChecklist">รายการตรวจสอบ</label><div class="checklist-input-group"><input type="text" id="newClItem" placeholder="พิมพ์รายการย่อย" style="margin-bottom:0;" onkeypress="if(event.key==='Enter'){event.preventDefault(); addClItem();}"><button type="button" class="btn-act" style="width:auto; margin:0; background:#28a745; padding: 10px 15px;" onclick="addClItem()"><i class="fas fa-plus"></i></button></div><div id="clDisplay" class="checklist-display"><div class="cl-placeholder">ยังไม่มีรายการย่อย</div></div></div>
+                <div style="display:flex; gap:10px; margin-top:15px;"><button type="button" class="btn-act" style="background:#f0f0f0; color:#555;" onclick="resetForm()">ล้างค่า</button><button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalAdd')">ยกเลิก</button><button type="button" class="btn-act" onclick="saveTask()">บันทึก</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalAddEvent" class="modal">
+        <div class="modal-content" style="max-width:350px;">
+            <h3 style="margin-top:0;">🗓️ เพิ่มเวร / นัดหมาย</h3>
+            <label>ลงในปฏิทิน</label>
+            <select id="evtCalName">
+                <option value="ตารางเวรสอบสวน">ตารางเวรสอบสวน</option>
+                <option value="งานคลินิก">งานคลินิก</option>
+                <option value="งานมลพิษ">งานมลพิษ</option>
+                <option value="งาน Check up">งาน Check up</option>
+                <option value="งานอาชีวฯ ใน รพ.">งานอาชีวฯ ใน รพ.</option>
+                <option value="งานอาชีวฯป้องกัน">งานอาชีวฯป้องกัน</option>
+                <option value="งานศูนย์เชี่ยวชาญฯ">งานศูนย์เชี่ยวชาญฯ</option>
+                <option value="งานปรับเปลี่ยน">งานปรับเปลี่ยน</option>
+                <option value="อบรม/ดูงาน/งานอื่นๆ">อบรม/ดูงาน/งานอื่นๆ</option>
+            </select>
+            <label>หัวข้อ (เช่น เวรเช้า, ประชุม)</label><input type="text" id="evtTitle" placeholder="ระบุหัวข้อ...">
+            <label>วันที่</label><input type="date" id="evtDate">
+            <label>รายละเอียด (ชื่อคน/สถานที่)</label><textarea id="evtDesc" rows="3" style="width:100%; border:1px solid #ddd; border-radius:6px; padding:10px; box-sizing:border-box;" placeholder="ระบุชื่อผู้ปฏิบัติงาน..."></textarea>
+            <div style="display:flex; gap:10px; margin-top:15px;"><button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalAddEvent')">ยกเลิก</button><button type="button" class="btn-act" onclick="submitEvent()">บันทึก</button></div>
+        </div>
+    </div>
+
+    <div id="modalUpload" class="modal"><div class="modal-content"><h3 style="margin-top:0;">📎 แนบหลักฐาน</h3><p id="uploadTaskTitle" style="color:#666; font-size:0.9rem;"></p><input type="hidden" id="uploadTaskId"><input type="hidden" id="uploadItemIndex"><input type="hidden" id="uploadMode"><input type="file" id="uFile" accept="image/*,.pdf"><div style="display:flex; gap:10px; margin-top:15px;"><button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalUpload')">ยกเลิก</button><button type="button" class="btn-act" onclick="submitUpload()">อัปโหลด</button></div></div></div>
+    <div id="modalContact" class="modal"><div class="modal-content"><h3 style="margin-top:0;" id="contactModalTitle">👤 เพิ่มรายชื่อ</h3><input type="hidden" id="cId"><label>ชื่อ-สกุล</label><input type="text" id="cName"><label>เบอร์โทรศัพท์</label><input type="tel" id="cPhone"><div style="display:flex; gap:10px; margin-top:15px;"><button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalContact')">ยกเลิก</button><button type="button" class="btn-act" onclick="saveContact()">บันทึก</button></div></div></div>
+    <div id="modalPrintOptions" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3 style="margin-top:0;"><i class="fas fa-print"></i> ตัวเลือกการพิมพ์รายงาน</h3>
+            
+            <label style="font-weight:bold; margin-bottom:5px; display:block;">1. กำหนดช่วงเวลา:</label>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:1;">
+                    <label style="font-size:0.85rem;">ตั้งแต่วันที่:</label>
+                    <input type="date" id="printStartDate" class="form-control">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:0.85rem;">ถึงวันที่:</label>
+                    <input type="date" id="printEndDate" class="form-control">
+                </div>
+            </div>
+
+            <hr style="border-top:1px solid #eee; margin:15px 0;">
+
+            <label style="font-weight:bold; margin-bottom:10px; display:block;">2. เลือกส่วนที่ต้องการแสดง:</label>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                
+                <label style="cursor:pointer; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="chkRoutine" checked style="width:18px; height:18px; margin:0; cursor:pointer;"> 
+                    <span style="font-size:1rem;">📋 งานประจำ (Routine)</span>
+                </label>
+                
+                <label style="cursor:pointer; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="chkProject" checked style="width:18px; height:18px; margin:0; cursor:pointer;"> 
+                    <span style="font-size:1rem;">🚀 โครงการ (Projects)</span>
+                </label>
+                
+                <label style="cursor:pointer; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="chkKPI" checked style="width:18px; height:18px; margin:0; cursor:pointer;"> 
+                    <span style="font-size:1rem;">🎯 ตัวชี้วัด (KPIs)</span>
+                </label>
+
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalPrintOptions')">ยกเลิก</button>
+                <button type="button" class="btn-act" onclick="generateReport()">
+                    <i class="fas fa-print"></i> สร้างรายงาน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // 🔥 ฟังก์ชันจัดการเลขรันเอกสาร (Doc Running)
+        // ----------------------------------------------------
+        function loadInitialDocNumbers() {
+            var types = ['quotation', 'billing', 'investigation'];
+            types.forEach(function(type) {
+                google.script.run.withSuccessHandler(function(num) {
+                    var el = document.getElementById('val_' + type);
+                    if(el) el.value = num;
+                }).getDocRunningNumber(type);
+            });
+        }
+        function incrementRunNum(type) {
+            google.script.run.withSuccessHandler(function(newNum) {
+                document.getElementById('val_' + type).value = newNum;
+            }).incrementDocRunningNumber(type);
+        }
+        function manualUpdateRunNum(type, newVal) {
+            if(!newVal) return;
+            google.script.run.withSuccessHandler(function(res) {
+                console.log('Updated: ' + res);
+            }).setDocRunningNumber(type, newVal);
+        }
+
+        // ----------------------------------------------------
+        // ฟังก์ชันเดิม
+        // ----------------------------------------------------
+
+        function openModalImage(src) { document.getElementById('imgPreview').src = src; document.getElementById('modalImage').style.display = 'flex'; }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('show'); }
+        function switchPage(pageId, el) { 
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active')); 
+            if(pageId !== 'schedule') { 
+                document.getElementById('page-'+pageId).classList.add('active');
+                if(el) { document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active')); el.classList.add('active'); } 
+                if(window.innerWidth < 768) toggleSidebar();
+            } 
+        }
+        function openCalendarModal() { document.getElementById('modalCalendar').style.display = 'flex'; }
+        function openAddEventModal() { document.getElementById('modalAddEvent').style.display = 'flex'; document.getElementById('evtTitle').value = ''; document.getElementById('evtDate').valueAsDate = new Date(); document.getElementById('evtDesc').value = ''; }
+        function submitEvent() { var calName = document.getElementById('evtCalName').value; var title = document.getElementById('evtTitle').value; var date = document.getElementById('evtDate').value; var desc = document.getElementById('evtDesc').value; if(!title || !date) return alert('กรุณาระบุหัวข้อและวันที่'); var btn = event.target; btn.innerText = 'บันทึก...'; btn.disabled = true; google.script.run.withSuccessHandler(function(res) { alert(res === "Success" ? "บันทึกเรียบร้อย!" : "เกิดข้อผิดพลาด: " + res); closeModal('modalAddEvent'); var frame = document.querySelector('.calendar-frame-container iframe'); if(frame) frame.src = frame.src; btn.innerText = 'บันทึก'; btn.disabled = false; }).addEventToCalendar({calName: calName, title: title, date: date, desc: desc}); }
+        
+        let currentChecklistItems = []; let tasks = []; let projects = []; let kpis = []; let contacts = [];
+        const CAT_MAP = { 'งานคลินิก': 'head-clinic', 'งานมลพิษ': 'head-pollution', 'งานอาชีวฯป้องกัน': 'head-prevent', 'งาน Check Up': 'head-checkup', 'งานอาชีวฯในโรงพยาบาล': 'head-hospital', 'ศูนย์เชี่ยวชาญฯ': 'head-center' };
+        
+        //window.onload = function() { loadAllData(); loadTodayShifts(); loadInitialDocNumbers(); document.getElementById('lblMonth').innerText = new Date().toLocaleDateString('th-TH', { month: 'long' }); };
+        
+        function loadTodayShifts() { google.script.run.withSuccessHandler(function(names) { document.getElementById('shiftText').innerText = "เวรวันนี้ : " + names; }).getTodayShifts(); }
+        
+        function loadAllData() { 
+            document.getElementById('loading').style.display = 'block'; 
+            document.getElementById('phoneLoading').style.display = 'block';
+
+            google.script.run.withSuccessHandler(res => { 
+                let data = JSON.parse(res); 
+                tasks = data.tasks; 
+                projects = data.projects; 
+                kpis = data.kpis; 
+                contacts = data.contacts; 
+                
+                updateOwnerDropdowns(); 
+                renderBoard('boardRoutine', tasks, 'task', 'routine_only'); 
+                
+                // Render Grid สำหรับ KPI และ Projects
+                renderGrid('list-kpi-active', kpis, 'kpi');
+                renderGrid('list-projects-active', projects, 'project'); 
+                
+                document.getElementById('loading').style.display = 'none'; 
+                document.getElementById('boardRoutine').style.display = 'grid'; 
+                
+                renderContacts(contacts); 
+                document.getElementById('phoneLoading').style.display = 'none';
+
+                // ✅✅✅ เพิ่มบรรทัดนี้ครับ: สั่งให้ไปดึงยอดวันนี้มาแปะ ✅✅✅
+                loadTodayBadges();
+
+            }).getAllData();
+        }
+        // ฟังก์ชันอัปเดตรายชื่อใน Dropdown ทั้ง 3 ช่อง
+        function updateOwnerDropdowns() {
+            const selects = ['tOwner', 'tOwner2', 'tOwner3'];
+            selects.forEach(id => {
+                let sel = document.getElementById(id);
+                if(sel) {
+                    let currentVal = sel.value;
+                    sel.innerHTML = `<option value="">-- เลือกเจ้าหน้าที่ --</option>`;
+                    contacts.forEach(c => {
+                        sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                    });
+                    sel.value = currentVal;
+                }
+            });
+        }
+
+        function renderGrid(containerId, dataList, mode) {
+            let container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if(!dataList || dataList.length === 0) {
+                container.innerHTML = '<div style="color:#aaa; text-align:center; grid-column:1/-1;">ไม่มีข้อมูล</div>';
+                return;
+            }
+            dataList.forEach(item => {
+                container.innerHTML += createCard(item, mode);
+            });
+        }
+
+        function renderBoard(containerId, dataList, mode, filterType) { 
+            let container = document.getElementById(containerId);
+            container.innerHTML = ''; 
+            for(let cat in CAT_MAP) { 
+                let headClass = CAT_MAP[cat]; let colId = `col-${Object.keys(CAT_MAP).indexOf(cat)}-${mode}`;
+                let routineHtml = `<div class="sub-section section-routine" style="border-top:none;"><div class="section-title"><span>📋 งานประจำ</span></div><div id="${colId}-routine"></div></div>`;
+                container.innerHTML += `<div class="column"><div class="col-header ${headClass}"><span>${cat}</span><button class="btn-head-add" onclick="openAddTask(null, '${cat}', '${mode}', '${filterType}')"><i class="fas fa-plus"></i></button></div>${routineHtml}</div>`;
+            } 
+            dataList.forEach(t => { 
+                if(!CAT_MAP[t.category]) return; 
+                // กรองงาน KPI ออกจากหน้างานประจำ
+                if(t.task_class === 'ตัวชี้วัด') return;
+                let colIdx = Object.keys(CAT_MAP).indexOf(t.category); 
+                document.getElementById(`col-${colIdx}-${mode}-routine`).innerHTML += createCard(t, mode); 
+            });
+        }
+function createCard(t, mode) { 
+            let isDone = t.status === 'Done';
+            
+            // 1. ส่วนแสดงเจ้าของงาน (Owner)
+            let ownerHtml = '';
+            if((mode === 'project' || mode === 'kpi') && t.task_class) {
+                let owners = t.task_class.split(', ');
+                let badges = owners.map(o => `<span class="owner-badge">${o}</span>`).join('');
+                ownerHtml = `<div class="owner-group" style="margin-bottom:4px;">${badges}</div>`;
+            }
+
+            // ✅✅✅ [เพิ่มส่วนนี้] แสดงชื่อการประเมิน (ถ้ามี) ✅✅✅
+            let sourceHtml = '';
+            if (t.kpi_source && t.kpi_source.trim() !== '') {
+                // สร้างป้ายกำกับชื่อการประเมิน (สีชมพูเข้ม)
+                sourceHtml = `<div style="font-size:0.75rem; color:#c2185b; background:#fce4ec; display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:5px; font-weight:bold; border:1px solid #f8bbd0;">
+                    <i class="fas fa-tag"></i> ${t.kpi_source}
+                </div><br>`;
+            }
+
+            // ถ้างานเสร็จแล้ว (Done)
+            if(isDone) return `<div class="card done">${ownerHtml}<div>${sourceHtml}<span class="task-title" style="text-decoration:line-through; color:#155724;"><i class="fas fa-check-circle"></i> ${t.title}</span></div><div class="card-actions"><div class="right-actions"><button class="btn-icon" onclick="openAddTask('${t.id}', null, '${mode}')"><i class="fas fa-pen"></i> แก้ไข</button><button class="btn-icon btn-restart" onclick="archiveTask('${t.id}', 'reset', '${mode}')" title="เริ่มใหม่"><i class="fas fa-redo"></i></button><button class="btn-icon btn-remove" onclick="archiveTask('${t.id}', 'archive', '${mode}')" title="เอาออก"><i class="fas fa-trash-alt"></i></button></div></div></div>`;
+            
+            // จัดการ Badge และวันครบกำหนด
+            let badgeCls = '', dayTxt = ''; 
+            if (t.is_daily) { badgeCls = 'daily'; dayTxt = '🔁 ทุกวัน'; } 
+            else { 
+                if(!t.deadline) {
+                    badgeCls = 'ok'; dayTxt = 'Ongoing';
+                } else {
+                    let diff = Math.ceil((new Date(t.deadline) - new Date().setHours(0,0,0,0))/86400000);
+                    badgeCls = diff < 0 ? 'urgent' : (diff<=3 ? 'urgent' : 'ok'); 
+                    dayTxt = diff < 0 ? `เกิน ${Math.abs(diff)} วัน` : (diff==0 ? 'วันนี้' : `เหลือ ${diff} วัน`);
+                }
+            } 
+            
+            // Badge NEW
+            let newBadgeHtml = '';
+            if (t.timestamp) {
+                let taskDate = new Date(t.timestamp);
+                let today = new Date();
+                if (taskDate.toDateString() === today.toDateString()) { newBadgeHtml = '<span class="badge-new"><i class="fas fa-star"></i> NEW</span>'; }
+            }
+
+            let progressBar = ''; 
+            let bodyHtml = '';
+            let uploadBtn = '';
+
+            // ==========================================
+            // LOGIC การแสดงผล (Number / Checklist)
+            // ==========================================
+            if(t.type == 'number') { 
+                let cur = parseInt(t.progress)||0;
+                let hasTarget = (t.target && t.target != '0'); 
+                
+                if (!hasTarget) {
+                    // --- 📌 โหมดสะสมยอด ---
+                    let nextMilestone = 100;
+                    if (cur >= 100) nextMilestone = 500;
+                    if (cur >= 500) nextMilestone = 1000;
+                    if (cur >= 1000) nextMilestone = Math.ceil((cur + 1) / 1000) * 1000;
+
+                    let pct = Math.min(100, Math.round((cur / nextMilestone) * 100));
+
+                    let totalDisplay = `
+                        <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:5px;">
+                            <span style="font-size:0.9rem; color:#666;">ยอดสะสมรวม:</span>
+                            <span style="font-size:1.4rem; font-weight:bold; color:#1a73e8;">${cur.toLocaleString()}</span>
+                        </div>`;
+                    
+                    progressBar = `
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#888; margin-bottom:2px;">
+                            <span>Level Up</span><span>เป้าถัดไป: ${nextMilestone.toLocaleString()}</span>
+                        </div>
+                        <div class="progress-cont" style="height:8px; margin-bottom:10px;">
+                            <div class="progress-bar bg-info" style="width:${pct}%; background-color:#00bcd4;"></div>
+                        </div>`;
+                    
+                    let logHtml = (t.LastLog && t.LastLog !== '' && t.LastLog !== '0') ? `<span style="font-size:0.8rem; color:#28a745; margin-left:5px;">(สรุปข้อมูลล่าสุด ${t.LastLog})</span>` : '';
+                    
+                    bodyHtml = `
+                        ${totalDisplay}
+                        ${progressBar}
+                        <div style="background:#f1f3f4; padding:8px; border-radius:6px; display:flex; gap:5px; align-items:center;">
+                            <input type="number" id="add_input_${t.id}" class="num-input" placeholder="ใส่ยอด" style="flex:1; width:auto; text-align:center;">
+                            <button class="btn-mini" style="background:#1a73e8; color:white; width:auto; padding:0 10px; font-weight:normal;" onclick="addToTotal('${t.id}', ${cur}, '${mode}')">
+                                <i class="fas fa-plus"></i> เพิ่ม
+                            </button>
+                        </div>
+                        <div style="text-align:right; margin-top:2px;">${logHtml}</div>
+                    `;
+
+                } else {
+                    // --- 📌 โหมดปกติ (มีเป้าหมาย) ---
+                    let tar = parseInt(t.target);
+                    let pct = Math.min(100, Math.round((cur/tar)*100));
+                    let logHtml = (t.LastLog && t.LastLog !== '' && t.LastLog !== '0') ? `<span style="font-size:0.8rem; font-weight:bold; color:${String(t.LastLog).includes('+')?'#2e7d32':'#c62828'}; margin-left:6px; background:#f1f8e9; padding:1px 5px; border-radius:4px;">${t.LastLog}</span>` : '';
+                    
+                    bodyHtml = `<div class="num-control"><button class="btn-mini" style="background:#ffebee;color:#c62828" onclick="updNum('${t.id}', -1, ${cur}, '${mode}')"><i class="fas fa-minus"></i></button><input type="number" class="num-input" value="${cur}" onchange="manualUpd('${t.id}', this.value, '${mode}')"><span class="num-total">/ ${tar}</span> ${logHtml} <button class="btn-mini" style="background:#e8f5e9;color:#2e7d32" onclick="updNum('${t.id}', 1, ${cur}, '${mode}')"><i class="fas fa-plus"></i></button></div>`;
+                    
+                    let barColor = pct > 75 ? 'bg-success' : (pct > 40 ? 'bg-warning' : 'bg-danger'); 
+                    progressBar = `<div class="progress-cont"><div class="progress-bar ${barColor}" style="width:${pct}%"></div><div class="progress-text">${pct}%</div></div>`;
+                }
+
+                uploadBtn = t.evidence ? `<div style="display:inline-flex;align-items:center;gap:3px;"><a href="${t.evidence}" target="_blank" class="btn-icon has-file"><i class="fas fa-file-alt"></i> ดูไฟล์</a><button class="btn-icon btn-remove" style="padding:1px 6px;" onclick="deleteAttachment('${t.id}', -1, '${mode}')" title="ลบไฟล์"><i class="fas fa-times"></i></button></div>` : `<button class="btn-icon btn-upload" onclick="openUpload('${t.id}', '${t.title}', -1, '${mode}')"><i class="fas fa-paperclip"></i> แนบไฟล์</button>`;
+
+            } else { 
+                // --- 📌 โหมด Checklist ---
+                let items = [];
+                try { items = t.progress.startsWith('[') ? JSON.parse(t.progress) : String(t.target).split(',').map((n,i)=>({item:n, status:String(t.progress).split(',')[i]=='true', file:''})); } catch(e){} 
+                let pct = items.length>0 ? Math.round((items.filter(x=>x.status).length/items.length)*100) : 0; 
+                items.forEach((obj, i) => { 
+                    let fileBtn = obj.file ? `<div style="display:flex;align-items:center;"><a href="${obj.file}" target="_blank" style="color:#1a73e8;margin-left:5px;"><i class="fas fa-file-alt"></i></a><i class="fas fa-times" style="color:#ea4335;cursor:pointer;margin-left:5px;font-size:0.8rem;" onclick="deleteAttachment('${t.id}', ${i}, '${mode}')" title="ลบไฟล์"></i></div>` : `<i class="fas fa-paperclip" style="color:#ccc;cursor:pointer;margin-left:5px;font-size:0.8rem;" onclick="openUpload('${t.id}', '${obj.item}', ${i}, '${mode}')"></i>`; 
+                    bodyHtml += `<div class="checklist-item ${obj.status?'checked':''}" style="justify-content:space-between;"><div style="display:flex;align-items:center;gap:6px;flex:1;" onclick="togCheck('${t.id}', ${i}, '${mode}')"><i class="fas ${obj.status?'fa-check-square':'fa-square'}" style="color:${obj.status?'#34a853':'#ccc'}"></i><span>${obj.item}</span></div><div>${fileBtn}</div></div>`;
+                });
+                let barColor = pct > 75 ? 'bg-success' : (pct > 40 ? 'bg-warning' : 'bg-danger'); 
+                progressBar = `<div class="progress-cont"><div class="progress-bar ${barColor}" style="width:${pct}%"></div><div class="progress-text">${pct}%</div></div>`;
+            } 
+            
+            let contentHtml = `<div class="task-content-scroll">${bodyHtml}</div>`;
+            let finalProgress = (t.type == 'number' && (!t.target || t.target=='0')) ? '' : progressBar;
+
+            // ✅ แทรก sourceHtml เข้าไปในการ์ด (ตรงเหนือชื่อ Task)
+            return `<div class="card">
+                ${ownerHtml}
+                ${sourceHtml} 
+                <div class="task-title">${t.title} ${newBadgeHtml}</div>
+                <div class="task-meta"><span class="badge ${badgeCls}">${dayTxt}</span></div>
+                ${finalProgress}
+                ${contentHtml}
+                <div class="card-actions"><div class="left-actions">${uploadBtn}</div><div class="right-actions"><button class="btn-icon" onclick="openAddTask('${t.id}', null, '${mode}')"><i class="fas fa-pen"></i> แก้ไข</button><button class="btn-icon btn-finish" onclick="toggleFinish('${t.id}', '${mode}')"><i class="fas fa-check-circle"></i> เสร็จ</button></div></div>
+            </div>`;
+        }
+        function addToTotal(id, currentTotal, mode) {
+            // ดึงค่าจากช่อง input ที่เราสร้างไว้ในการ์ด
+            let inputId = 'add_input_' + id;
+            let valToAdd = parseInt(document.getElementById(inputId).value);
+
+            if (isNaN(valToAdd) || valToAdd <= 0) {
+                alert("กรุณาระบุจำนวนที่ต้องการเพิ่ม");
+                return;
+            }
+
+            let newTotal = parseInt(currentTotal) + valToAdd;
+            
+            // ส่งค่าไปบันทึก (ใช้ฟังก์ชันเดิมที่มีอยู่แล้ว)
+            // ระบบจะบันทึก Log ให้อัตโนมัติว่า (+XX)
+            sendUpd(id, {progress: newTotal}, mode);
+
+            // ✅✅✅ เพิ่มตรงนี้ครับ: สั่งให้อัปเดตป้ายยอดวันนี้ทันที ✅✅✅
+            // ตั้งเวลาหน่วงไว้ 1 วินาที รอให้ Backend บันทึก Log เสร็จก่อน แล้วค่อยดึงตัวเลขใหม่มาโชว์
+            setTimeout(function() {
+                loadTodayBadges(); 
+            }, 1000);
+        }
+function openAddTask(id, cat, mode, filterType) { 
+            document.getElementById('modalAdd').style.display='flex';
+            resetForm(); 
+            document.getElementById('tMode').value = mode || 'task'; 
+            document.getElementById('taskModalTitle').innerText = (mode==='project' || mode==='kpi' ? '📝 เพิ่ม/แก้ไข '+mode : '📝 เพิ่มงานใหม่');
+            document.getElementById('lblTitle').innerText = (mode==='project'?'ชื่อโครงการ':(mode==='kpi'?'ชื่อตัวชี้วัด':'ชื่องาน'));
+            
+            // --- ส่วนที่แก้ไข Logic การแสดงผล ---
+            if(mode === 'project' || mode === 'kpi') { 
+                // ซ่อนฟอร์มงานประจำ
+                document.getElementById('form-task-only').style.display='none';
+                
+                // โชว์ฟอร์ม Project/KPI
+                document.getElementById('form-project-only').style.display='block'; 
+                
+                // โชว์ช่องชื่อการประเมินเฉพาะ KPI
+                document.getElementById('divKpi').style.display = (mode === 'kpi') ? 'block' : 'none';
+
+                // ============ จุดที่แก้ไข ============
+                if (mode === 'kpi') {
+                    // ถ้าเป็น KPI: ให้โชว์ตัวเลือก "รูปแบบวัดผล" (เลือกได้ทั้งนับจำนวน/Checklist)
+                    document.getElementById('form-measure-type').style.display = 'block';
+                    // ถ้าเป็นการเพิ่มใหม่ ให้ค่าเริ่มต้นเป็น checklist (หรือจะเปลี่ยนเป็น number ก็ได้ถ้าต้องการ)
+                    if(!id) document.getElementById('tType').value = 'checklist'; 
+                } else {
+                    // ถ้าเป็น Project: บังคับซ่อนตัวเลือก และล็อคเป็น Checklist เหมือนเดิม
+                    document.getElementById('form-measure-type').style.display = 'none';
+                    document.getElementById('tType').value = 'checklist';
+                }
+                // ===================================
+
+                document.getElementById('lblChecklist').innerText='ขั้นตอนการดำเนินงาน';
+                
+                // กำหนดประเภทงานอัตโนมัติ
+                document.getElementById('tClass').value = (mode === 'kpi') ? 'ตัวชี้วัด' : 'โครงการ';
+
+                updateOwnerDropdowns();
+                togInp(); // สั่งอัปเดตช่องกรอกข้อมูลตามประเภทวัดผลทันที
+            } else { 
+                // โหมดงานประจำ (Task)
+                document.getElementById('form-task-only').style.display='block';
+                document.getElementById('form-project-only').style.display='none'; 
+                document.getElementById('divKpi').style.display='none'; // ซ่อนเสมอ
+                
+                document.getElementById('form-measure-type').style.display='block'; 
+                document.getElementById('lblChecklist').innerText='รายการย่อย'; 
+                
+                document.getElementById('tClass').value = 'งานประจำ';
+                
+                togKpi(); 
+            } 
+            // -----------------------------------
+            
+            if(id) { 
+                let list;
+                if(mode==='project') list = projects;
+                else if(mode==='kpi') list = kpis;
+                else list = tasks;
+
+                let t = list.find(x=>String(x.id)===String(id));
+                if(t) { 
+                    document.getElementById('tId').value = t.id;
+                    if(document.getElementById('tCat')) document.getElementById('tCat').value = t.category; 
+                    document.getElementById('tKpiSource').value = t.kpi_source;
+                    document.getElementById('tTitle').value = t.title; 
+                    document.getElementById('chkDaily').checked = t.is_daily;
+
+                    if(mode==='project' || mode==='kpi') {
+                         let owners = t.task_class ? t.task_class.split(', ') : [];
+                         document.getElementById('tOwner').value = owners[0] || "";
+                         document.getElementById('tOwner2').value = owners[1] || "";
+                         document.getElementById('tOwner3').value = owners[2] || "";
+                    }
+
+                    if (!t.is_daily && t.deadline) {
+                        let d = new Date(t.deadline);
+                        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                        document.getElementById('tDate').value = d.toISOString().split('T')[0];
+                    }
+
+                    document.getElementById('tType').value = t.type;
+                    if(t.type == 'number') document.getElementById('tTarNum').value = t.target; 
+                    else { currentChecklistItems = t.target.split(','); renderClItems(); } 
+                    
+                    togKpi();
+                    togInp(); togDate();
+                } 
+            } else { 
+                document.getElementById('tId').value = '';
+                if(cat && document.getElementById('tCat')) document.getElementById('tCat').value = cat;
+                if(mode==='project' || mode==='kpi'){ currentChecklistItems=[]; renderClItems(); } 
+            } 
+        }
+
+        function saveTask() { 
+            let mode = document.getElementById('tMode').value;
+            let id = document.getElementById('tId').value; 
+            
+            // จัดการ 3 Owners
+            let o1 = document.getElementById('tOwner').value;
+            let o2 = document.getElementById('tOwner2').value;
+            let o3 = document.getElementById('tOwner3').value;
+            let combinedOwners = [o1, o2, o3].filter(n => n !== "").join(", ");
+            
+            let owner = (mode==='project' || mode==='kpi') ? combinedOwners : document.getElementById('tClass').value; 
+            let selectedCat = (mode === 'project') ? 'งานโครงการ' : (mode === 'kpi' ? 'KPI' : document.getElementById('tCat').value); 
+            
+            let payload = { action: id ? 'แก้ไข' : 'add', mode: mode, id: id, category: selectedCat, task_class: owner, kpi_source:document.getElementById('tKpiSource').value, title:document.getElementById('tTitle').value, is_daily:document.getElementById('chkDaily').checked, deadline:document.getElementById('tDate').value, type:document.getElementById('tType').value }; 
+            if(payload.type=='number') payload.target=document.getElementById('tTarNum').value;
+            else { if(currentChecklistItems.length===0) return alert('ต้องมีรายการอย่างน้อย 1 ข้อ'); payload.target=currentChecklistItems.join(','); } 
+            
+            if(!payload.title || !payload.target) return alert('กรอกข้อมูลไม่ครบ'); 
+            const btn=event.target; btn.innerText='บันทึก...'; btn.disabled=true;
+            google.script.run.withSuccessHandler(()=>{ closeModal('modalAdd'); loadAllData(); btn.innerText='บันทึก'; btn.disabled=false; }).saveItemToSheet(payload); 
+        }
+
+        function updNum(id, chg, cur, mode) { let val=parseInt(cur)+parseInt(chg); if(val<0)return; sendUpd(id, {progress:val}, mode); }
+        function manualUpd(id, val, mode) { let v=parseInt(val); if(isNaN(v)||v<0)return; sendUpd(id, {progress:v}, mode); }
+        function togCheck(id, idx, mode) { 
+            let list;
+            if(mode==='project') list = projects;
+            else if(mode==='kpi') list = kpis;
+            else list = tasks;
+
+            let t = list.find(x=>x.id==id); let items = t.progress.startsWith('[') ? JSON.parse(t.progress) : []; items[idx].status = !items[idx].status;
+            sendUpd(id, {progress:JSON.stringify(items)}, mode); 
+        }
+        function toggleFinish(id, mode) { if(confirm('ยืนยันเสร็จสิ้น?')) sendUpd(id, {status:'Done'}, mode); }
+        function archiveTask(id, type, mode) { if(type==='archive' && !confirm('ลบ?')) return; if(type==='reset' && !confirm('เริ่มใหม่?')) return; let payload = {status: type==='archive'?'Archived':'Active'}; 
+            if(type==='reset') { 
+                let list;
+                if(mode==='project') list = projects;
+                else if(mode==='kpi') list = kpis;
+                else list = tasks;
+
+                let t = list.find(x=>x.id==id); payload.reset=true; payload.new_progress = t.type=='number'?0:t.target.split(',').map(x=>'false').join(','); if(t.type=='checklist') { let items = t.target.split(','); payload.new_progress = JSON.stringify(items.map(x=>({item:x.trim(), status:false, file:''}))); } } sendUpd(id, payload, mode); 
+        }
+        function sendUpd(id, data, mode) { data.action = 'update_progress'; data.id = id; data.mode = mode; google.script.run.saveItemToSheet(data); setTimeout(loadAllData, 500); }
+        function openUpload(id, title, index, mode) { document.getElementById('modalUpload').style.display='flex'; document.getElementById('uploadTaskId').value = id; document.getElementById('uploadItemIndex').value = index; document.getElementById('uploadMode').value = mode; document.getElementById('uploadTaskTitle').innerText = title; }
+        function submitUpload() { let mode = document.getElementById('uploadMode').value; let id = document.getElementById('uploadTaskId').value; let idx = document.getElementById('uploadItemIndex').value; let f = document.getElementById('uFile').files[0]; if(!f) return alert('เลือกไฟล์ก่อน'); const btn=event.target; btn.innerText='อัปโหลด...'; btn.disabled=true; let r=new FileReader(); r.onload=function(e) { let action = (idx != -1) ? 'upload_checklist_item' : 'update_progress'; google.script.run.withSuccessHandler(()=>{ alert('เรียบร้อย!'); closeModal('modalUpload'); loadAllData(); btn.innerText='อัปโหลด'; btn.disabled=false; }).saveItemToSheet({ action:action, id:id, mode:mode, itemIndex:idx, fileData:e.target.result, fileName:f.name, isChecklistItem:(idx!=-1) }); }; r.readAsDataURL(f); }
+        function deleteAttachment(id, index, mode) { if(!confirm('⚠️ ต้องการลบไฟล์แนบนี้ใช่หรือไม่?')) return; document.body.style.cursor = 'wait'; google.script.run.withSuccessHandler(function() { document.body.style.cursor = 'default'; loadAllData(); }).saveItemToSheet({ action: 'delete_file', id: id, mode: mode, itemIndex: index }); }
+        
+        function toggleSec(id, el) { let c=document.getElementById(id); c.style.display=c.style.display==='none'?'block':'none'; el.classList.toggle('collapsed'); }
+        function closeModal(id) { document.getElementById(id).style.display='none'; }
+        function resetForm() { document.getElementById('addTaskForm').reset(); document.getElementById('tDate').valueAsDate = new Date(); currentChecklistItems = []; renderClItems(); togKpi(); togInp(); togDate(); }
+        function togInp() { let t=document.getElementById('tType').value; document.getElementById('tTarNum').style.display=t=='number'?'block':'none'; document.getElementById('divChecklistControl').style.display=t=='checklist'?'block':'none'; }
+        function togKpi() { document.getElementById('divKpi').style.display=document.getElementById('tClass').value=='ตัวชี้วัด'?'block':'none'; }
+        function togDate() { document.getElementById('tDate').disabled=document.getElementById('chkDaily').checked; }
+        function addClItem() { let v=document.getElementById('newClItem').value.trim(); if(v) { currentChecklistItems.push(v); document.getElementById('newClItem').value=''; renderClItems(); } }
+        function removeClItem(i) { currentChecklistItems.splice(i,1); renderClItems(); }
+        function renderClItems() { document.getElementById('clDisplay').innerHTML = currentChecklistItems.length? currentChecklistItems.map((x,i)=>`<div class="cl-item-row"><span>${i+1}. ${x}</span><button type="button" class="btn-cl-del" onclick="removeClItem(${i})"><i class="fas fa-trash"></i></button></div>`).join('') : '<div class="cl-placeholder">ไม่มีรายการ</div>'; }
+        
+        function renderContacts(l) { document.getElementById('phoneList').innerHTML = l.map(c=>`<tr class="contact-row"><td>${c.name}</td><td><a href="tel:${c.phone}" style="color:#1a73e8;font-weight:bold;">${c.phone}</a></td><td class="contact-actions"><button class="btn-contact btn-edit" onclick="openContactModal('${c.id}')"><i class="fas fa-pen"></i></button><button class="btn-contact btn-delete" onclick="deleteContact('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
+        function filterPhone() { let t=document.getElementById('searchPhone').value.toLowerCase(); renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(t)||c.phone.includes(t))); }
+        function openContactModal(id) { document.getElementById('modalContact').style.display='flex'; if(id){let c=contacts.find(x=>x.id==id);document.getElementById('cId').value=c.id;document.getElementById('cName').value=c.name;document.getElementById('cPhone').value=c.phone;document.getElementById('contactModalTitle').innerText='✏️ แก้ไข';}else{document.getElementById('cId').value='';document.getElementById('cName').value='';document.getElementById('cPhone').value='';document.getElementById('contactModalTitle').innerText='👤 เพิ่ม';} }
+        function saveContact() { let id=document.getElementById('cId').value, n=document.getElementById('cName').value, p=document.getElementById('cPhone').value; if(!n||!p)return; google.script.run.withSuccessHandler(()=>{closeModal('modalContact');loadAllData();}).saveContactToSheet({action:id?'edit_contact':'add_contact',id:id,name:n,phone:p}); }
+        function deleteContact(id) { if(confirm('ลบ?')) google.script.run.withSuccessHandler(()=>{loadAllData();}).saveContactToSheet({action:'delete_contact',id:id}); }
+        // ----------------------------------------------------
+      // ==========================================
+        // 🖨️ ระบบพิมพ์รายงาน (V.3 ปฏิทิน + จัดคอลัมน์ใหม่)
+        // ==========================================
+        
+        function openPrintModal() {
+            document.getElementById('modalPrintOptions').style.display = 'flex';
+            
+            // ตั้งค่าเริ่มต้นเป็นวันที่ 1 ถึง วันปัจจุบัน ของเดือนนี้
+            let date = new Date();
+            let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+            
+            // Helper function แปลงวันที่เป็น YYYY-MM-DD สำหรับ input type="date"
+            const toInputDate = (d) => d.toISOString().split('T')[0];
+            
+            document.getElementById('printStartDate').value = toInputDate(firstDay);
+            document.getElementById('printEndDate').value = toInputDate(date);
+        }
+// ==========================================
+        // 🖨️ ระบบพิมพ์รายงาน (V.Full Option: แก้ NaN + Checklist + เลือกส่วน)
+        // ==========================================
+
+        function generateReport() {
+            let sDateVal = document.getElementById('printStartDate').value;
+            let eDateVal = document.getElementById('printEndDate').value;
+            
+            // ดึงค่า Checkbox ว่า user เลือกจะเอาอะไรบ้าง
+            let opt = {
+                routine: document.getElementById('chkRoutine').checked,
+                project: document.getElementById('chkProject').checked,
+                kpi: document.getElementById('chkKPI').checked
+            };
+
+            if (!opt.routine && !opt.project && !opt.kpi) {
+                alert("กรุณาเลือกข้อมูลอย่างน้อย 1 ส่วน");
+                return;
+            }
+
+            let btn = event.target;
+            let originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังคำนวณ...';
+            btn.disabled = true;
+
+            const formatThDate = (dStr) => {
+                if(!dStr) return "...";
+                let d = new Date(dStr);
+                return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+            };
+            let dateRangeText = `ระหว่างวันที่ ${formatThDate(sDateVal)} ถึง ${formatThDate(eDateVal)}`;
+
+            // เรียก Backend
+            google.script.run.withSuccessHandler(function(reportData) {
+                renderPrintWindow(reportData, kpis, projects, dateRangeText, opt);
+                closeModal('modalPrintOptions');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).getReportByDateRange(sDateVal, eDateVal);
+        }
+function renderPrintWindow(taskList, kpiList, projectList, dateRangeLabel, options) {
+            let printDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            // ใช้ฟอนต์ Sarabun (เพราะชัวร์สุดบนเว็บ)
+            let fontStack = "'Sarabun', sans-serif";
+            
+            // ✅ ปรับขนาดฟอนต์ในตารางลงเหลือ 12pt (จะได้ไม่ดูใหญ่เทอะทะ)
+            let tdStyle = 'border: 1px solid #000 !important; padding: 4px 6px; font-size: 12pt; line-height: 1.3; vertical-align: top;';
+            let thStyle = 'border: 1px solid #000 !important; padding: 6px; font-size: 12pt; font-weight: bold; background-color: #f0f0f0 !important; text-align: center; vertical-align: middle; -webkit-print-color-adjust: exact;';
+
+            // 1. Routine Section
+            let routineHtml = '';
+            if (options.routine) {
+                let routineRows = taskList.filter(t => t.type == 'number' || t.type == 'checklist').map((t, index) => {
+                    let resultDisplay = '-', targetDisplay = '-', accumDisplay = '-';
+
+                    if (t.type === 'checklist') {
+                        let items = []; try { items = JSON.parse(t.progress); } catch(e) { items = []; }
+                        let totalItems = items.length;
+                        let completedItems = items.filter(i => i.status).length;
+                        targetDisplay = totalItems > 0 ? totalItems + " ข้อ" : "-";
+                        accumDisplay = totalItems > 0 ? `เสร็จ ${completedItems} ข้อ` : "0";
+                    } else {
+                        let rangeTotal = parseInt(t.range_total); if (isNaN(rangeTotal)) rangeTotal = 0;
+                        let accumTotal = parseInt(t.progress); if (isNaN(accumTotal)) accumTotal = 0;
+                        let target = parseInt(t.target);
+                        resultDisplay = rangeTotal.toLocaleString();
+                        accumDisplay = accumTotal.toLocaleString();
+                        targetDisplay = (!isNaN(target) && t.target !== "") ? target.toLocaleString() : "-";
+                    }
+
+                    return `<tr>
+                        <td style="${tdStyle} text-align:center;">${index + 1}</td>
+                        <td style="${tdStyle} text-align:left;">${t.title}</td>
+                        <td style="${tdStyle} text-align:center;">${t.category}</td>
+                        <td style="${tdStyle} text-align:center; font-weight:bold;">${resultDisplay}</td>
+                        <td style="${tdStyle} text-align:center;">${targetDisplay}</td>
+                        <td style="${tdStyle} text-align:center; background-color:#fafafa;">${accumDisplay}</td>
+                    </tr>`;
+                }).join('');
+
+                routineHtml = `
+                    <h4 style="font-size:14pt; margin: 15px 0 5px 0; font-weight:bold; text-align:left;">1. สรุปยอดผู้รับบริการ / ภาระงาน (Routine)</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="${thStyle} width:6%;">ลำดับ</th>
+                                <th style="${thStyle} width:39%;">รายการ</th>
+                                <th style="${thStyle} width:15%;">กลุ่มงาน</th>
+                                <th style="${thStyle} width:10%;">ยอดที่ได้</th>
+                                <th style="${thStyle} width:15%;">เป้าหมาย</th>
+                                <th style="${thStyle} width:15%;">ยอดสะสม</th>
+                            </tr>
+                        </thead>
+                        <tbody>${routineRows || '<tr><td colspan="6" style="text-align:center; border:1px solid #000; padding:10px;">ไม่มีข้อมูล</td></tr>'}</tbody>
+                    </table>`;
+            }
+
+            // 2. Project/KPI Section
+            let projectHtml = '';
+            let combinedList = [];
+            if (options.project) combinedList = combinedList.concat(projectList);
+            if (options.kpi) combinedList = combinedList.concat(kpiList);
+
+            if (combinedList.length > 0) {
+                let projectRows = combinedList.map((p, index) => {
+                    let pct = 0;
+                    if(p.type == 'number') {
+                        let cur = parseInt(p.progress)||0, tar = parseInt(p.target)||100;
+                        pct = Math.min(100, Math.round((cur/tar)*100));
+                    } else {
+                        try { let items = JSON.parse(p.progress); pct = items.length>0 ? Math.round((items.filter(x=>x.status).length/items.length)*100) : 0; } catch(e){}
+                    }
+                    let statusColor = pct >= 100 ? '#28a745' : (pct > 50 ? '#ffc107' : '#dc3545');
+                    let typeLabel = p.task_class.includes('ตัวชี้วัด') ? '<span style="color:#c2185b; font-weight:bold;">[KPI]</span>' : '<span style="color:#1976d2; font-weight:bold;">[Pro]</span>';
+
+                    return `<tr>
+                        <td style="${tdStyle} text-align:center;">${index + 1}</td>
+                        <td style="${tdStyle} text-align:left;">${typeLabel} ${p.title}</td>
+                        <td style="${tdStyle} text-align:center;">${p.task_class.replace('ตัวชี้วัด', '').replace('โครงการ', '') || '-'}</td>
+                        <td style="${tdStyle} text-align:center;">
+                            <div style="border:1px solid #999; height:10px; width:80%; background:#e0e0e0; border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle;">
+                                <div style="width:${pct}%; height:100%; background:${statusColor};"></div>
+                            </div>
+                            <br><span style="font-size:11pt;">${pct}%</span>
+                        </td>
+                        <td style="${tdStyle} text-align:center;">${p.kpi_source || '-'}</td>
+                    </tr>`;
+                }).join('');
+
+                projectHtml = `
+                    <h4 style="font-size:14pt; margin: 15px 0 5px 0; font-weight:bold; text-align:left;">2. ความคืบหน้าโครงการและตัวชี้วัด (Project & KPI)</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="${thStyle} width:6%;">ลำดับ</th>
+                                <th style="${thStyle} width:40%;">ชื่อโครงการ / ตัวชี้วัด</th>
+                                <th style="${thStyle} width:20%;">ผู้รับผิดชอบ</th>
+                                <th style="${thStyle} width:17%;">ความคืบหน้า</th>
+                                <th style="${thStyle} width:17%;">การประเมิน</th>
+                            </tr>
+                        </thead>
+                        <tbody>${projectRows}</tbody>
+                    </table>`;
+            }
+
+            // 3. Generate HTML
+            let printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>รายงานสรุปผลการดำเนินงาน</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: ${fontStack}; background: #525659; margin: 0; padding: 20px; }
+                        
+                        .paper { 
+                            background: white; 
+                            padding: 2cm; 
+                            width: 210mm; 
+                            margin: 0 auto; 
+                            min-height: 297mm; 
+                            box-sizing: border-box; 
+                            position: relative; 
+                        }
+                        
+                        /* ✅ [แก้ข้อ 1] ไม้ตายซ่อนปุ่ม: ซ่อนทุกอย่างในโลกก่อน แล้วค่อยโชว์เฉพาะกระดาษ */
+                        @media print {
+                            body * {
+                                visibility: hidden;
+                            }
+                            .paper, .paper * {
+                                visibility: visible;
+                            }
+                            .paper {
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                                margin: 0;
+                                padding: 2cm;
+                                width: 100%;
+                                box-shadow: none;
+                            }
+                            @page {
+                                size: A4;
+                                margin: 0; 
+                            }
+                        }
+                        
+                        .toolbar { 
+                            position: fixed; top: 0; left: 0; width: 100%; 
+                            background: #323639; color: white; padding: 10px; 
+                            text-align: center; display: flex; justify-content: center; gap: 10px; 
+                            z-index: 9999; font-family: 'Sarabun', sans-serif; 
+                        }
+                        
+                        .btn-print { background: #1a73e8; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: 'Sarabun'; }
+                        .btn-close { background: #ea4335; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: 'Sarabun'; }
+                        
+                        /* ✅ [แก้ข้อ 2] จัดกึ่งกลาง: ใช้ width 100% + text-align center บังคับ */
+                        .header-container { width: 100%; text-align: center; margin-bottom: 20px; }
+                        
+                        /* ✅ [แก้ข้อ 5] ปรับขนาด Header ให้เล็กลง (18pt / 16pt) */
+                        h1 { font-size: 18pt; font-weight: bold; margin: 0 0 5px 0; line-height: 1.2; }
+                        h3 { font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.2; }
+                        .date-info { font-size: 14pt; margin-top: 5px; color:#000; font-weight: bold; }
+                        
+                        .footer { margin-top: 50px; display: flex; justify-content: space-between; text-align: center; font-size: 14pt; }
+                    </style>
+                </head>
+                <body>
+                    <div class="toolbar">
+                        <button class="btn-print" onclick="window.print()">🖨️ สั่งพิมพ์ (Print)</button>
+                        <button class="btn-close" onclick="window.close()">❌ ปิดหน้าต่าง</button>
+                    </div>
+                    
+                    <div class="paper">
+                        <div class="header-container">
+                            <h1>สรุปรายงานการปฏิบัติงาน</h1>
+                            <h3>กลุ่มงานอาชีวเวชกรรม โรงพยาบาลเฉลิมพระเกียรติฯ ระยอง</h3>
+                            <div class="date-info">${dateRangeLabel}</div>
+                            <div style="font-size:11pt; color:#666; margin-top:5px; font-weight:normal;">(วันที่พิมพ์: ${printDate})</div>
+                        </div>
+
+                        ${routineHtml}
+                        ${projectHtml}
+
+                        <div class="footer">
+                            <div style="width:250px;">
+                                <br><br>......................................................<br>
+                                (......................................................)<br>
+                                ผู้รายงาน
+                            </div>
+                            <div style="width:250px;">
+                                <br><br>......................................................<br>
+                                (......................................................)<br>
+                                หัวหน้ากลุ่มงานอาชีวเวชกรรม
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+        // ฟังก์ชันวิ่งแปะป้าย "ยอดวันนี้"
+        function loadTodayBadges() {
+            google.script.run.withSuccessHandler(function(stats) {
+                // stats คือข้อมูล { task_id: จำนวนวันนี้ }
+                for (var id in stats) {
+                    var count = stats[id];
+                    if (count > 0) {
+                        // หาตำแหน่งที่จะแปะ (ผมเดาว่าแปะไว้แถวๆ ชื่อ หรือ ยอดรวม ก็ได้)
+                        // ในที่นี้เราจะพยายามหา Element ที่แสดงยอดรวม แล้วแปะต่อท้าย
+                        
+                        // วิธีที่ง่ายที่สุด: ค้นหา div ของการ์ดนั้น แล้วแทรก HTML เข้าไป
+                        // แต่วิธีนี้ต้องชัวร์ว่าเรามี ID อ้างอิง
+                        
+                        // ✨ เทคนิค: เราจะแปะลงไปใน div ที่แสดงตัวเลขยอดรวม
+                        // สมมติว่าคุณป๊อปใช้รูปแบบการแสดงผลมาตรฐาน
+                        
+                        // ลองหา Element ที่เป็นชื่อ ID input ของเรา (add_input_ไอดี) 
+                        // แล้วขยับขึ้นไปหาที่อยู่ของมันเพื่อแปะป้าย
+                        var inputEl = document.getElementById('add_input_' + id);
+                        if (inputEl) {
+                            // ย้อนกลับไปหา Parent (ตัวการ์ด) หรือหาที่ว่างๆ แปะ
+                            // แนะนำ: สร้าง span ID พิเศษรอไว้ในฟังก์ชัน renderTask จะดีที่สุด
+                            // แต่ถ้าเอาแบบไม่ต้องแก้ renderTask เยอะ... ใช้บรรทัดนี้ครับ 👇
+                            
+                            var labelId = 'today_badge_' + id;
+                            if (!document.getElementById(labelId)) {
+                                // สร้างป้ายใหม่
+                                var badge = document.createElement("div");
+                                badge.id = labelId;
+                                badge.innerHTML = '<i class="fas fa-calendar-day"></i> วันนี้: <span style="color:#2ecc71; font-weight:bold;">+' + count + '</span>';
+                                badge.style.fontSize = "0.8rem";
+                                badge.style.color = "#555";
+                                badge.style.marginTop = "5px";
+                                badge.style.textAlign = "right"; // จัดชิดขวา
+                                
+                                // แทรกเข้าไปก่อนถึงช่องใส่ยอด (Input Group)
+                                inputEl.parentNode.parentNode.insertBefore(badge, inputEl.parentNode);
+                            } else {
+                                // ถ้ามีป้ายอยู่แล้ว ให้อัปเดตตัวเลข
+                                document.getElementById(labelId).innerHTML = '<i class="fas fa-calendar-day"></i> วันนี้: <span style="color:#2ecc71; font-weight:bold;">+' + count + '</span>';
+                            }
+                        }
+                    }
+                }
+            }).getTodayLogStats();
+        }
+        function doAppLogin() {
+            var pass = document.getElementById('txtAppPassword').value;
+            var btn = event.target;
+            var originalText = btn.innerText;
+            
+            btn.innerText = 'กำลังตรวจสอบ...';
+            btn.disabled = true;
+
+            google.script.run.withSuccessHandler(function(isCorrect) {
+                if (isCorrect) {
+                    // 1. ถ้ารหัสถูก: ซ่อนหน้า Login
+                    document.getElementById('loginScreen').style.opacity = '0';
+                    setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; }, 500);
+                    
+                    // 2. ✅ เริ่มโหลดข้อมูลทุกอย่างตรงนี้ (ย้ายมาจาก window.onload)
+                    loadAllData(); 
+                    loadTodayShifts();
+                    loadInitialDocNumbers();
+                    document.getElementById('lblMonth').innerText = new Date().toLocaleDateString('th-TH', { month: 'long' });
+                    
+                } else {
+                    // ถ้ารหัสผิด
+                    alert("❌ รหัสผ่านไม่ถูกต้อง");
+                    document.getElementById('txtAppPassword').value = '';
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            }).checkLoginPass(pass);
+        }
+        // เพิ่มลูกเล่น: กด Enter ในช่องรหัสได้เลย
+        document.getElementById("txtAppPassword").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") { doAppLogin(); }
+        });
+    </script>
+</body>
+</html>
