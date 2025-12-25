@@ -162,19 +162,161 @@
             .sidebar.show { left: 0; } .menu-toggle { display: block; } .board { grid-template-columns: 1fr; } .column { margin-bottom: 20px; } .main-content { padding-top: 60px; } .tool-bar { flex-direction: column; }
             .header-group { gap: 10px; } .shift-badge { width: 100%; justify-content: center; }
         }
+        /* 🚨 Emergency Overlay Styles (แก้แล้ว: ให้เลื่อนจอได้ + เริ่มต้นจากด้านบน) */
+        #emergencyOverlay {
+            display: none; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #b71c1c; color: white; z-index: 10000;
+            
+            /* 👇 แก้ตรงนี้ครับ: เปลี่ยนจาก center เป็น flex-start เพื่อให้เริ่มเรียงจากด้านบน */
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: center;
+            
+            text-align: center; font-family: 'Sarabun', sans-serif;
+            animation: bgPulse 2s infinite;
+            
+            /* 👇 เพิ่มตรงนี้ครับ: ให้เลื่อนหน้าจอได้เวลามีเมนูเยอะๆ */
+            overflow-y: auto; 
+            padding-top: 50px; /* เว้นระยะจากขอบบนหน่อย */
+            padding-bottom: 50px; /* เว้นระยะขอบล่าง */
+        }
+        
+        #emergencyOverlay h1 { font-size: 3rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        #emergencyOverlay p { font-size: 1.5rem; margin-top: 10px; max-width: 80%; line-height: 1.4; }
+        #emergencyOverlay .icon-box { font-size: 5rem; margin-bottom: 20px; animation: iconShake 0.5s infinite; }
+
+        /* 👇 เพิ่มก้อนนี้ด้วยครับ: เพื่อให้เวลากดดูรูปแผน ICS มันเด้งขึ้นมา "ทับ" หน้าจอแดง */
+        #modalImage {
+            z-index: 10001 !important; /* เลขต้องมากกว่า 10000 */
+        }
+        
+        @keyframes bgPulse { 
+            0% { background-color: #b71c1c; } 
+            50% { background-color: #d32f2f; } 
+            100% { background-color: #b71c1c; } 
+        }
+        @keyframes iconShake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+        }
     </style>
 </head>
 <body>
-  <div id="loginScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(50,54,57,0.95); z-index:99999; display:flex; justify-content:center; align-items:center;">
-        <div class="card" style="background:white; padding:40px; border-radius:15px; text-align:center; width:350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            <div style="font-size:3rem; margin-bottom:10px;">🔐</div>
-            <h3 style="margin:0 0 20px 0; color:#333;">กรุณาระบุรหัสผ่าน</h3>
+  
+<div id="emergencyOverlay" style="padding-top: 10px !important; position: fixed; overflow-y: auto;"> 
+        
+        <button onclick="deactivateEmergency()" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; backdrop-filter: blur(4px); transition: 0.2s; z-index: 10002;">
+            <i class="fas fa-user-shield"></i> ปิดแจ้งเตือน
+        </button>
+
+        <div class="home-grid" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; max-width: 600px; margin: 0 auto 10px auto; padding-right: 80px; padding-left: 10px;">
+            <div class="link-card" onclick="openModalImage('https://lh3.googleusercontent.com/d/17TEmrWpI_Hz7ZeX3SP-WgBgcm05OjubV')" style="padding: 8px 2px; cursor: pointer; flex: 0 0 85px; border-radius: 8px;">
+                <i class="fas fa-sitemap" style="color:#ea4335; font-size: 1.2rem; margin-bottom:4px;"></i>
+                <h3 style="font-size: 0.65rem; margin: 0; color:#333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ICS OCC</h3>
+            </div>
+            <div class="link-card" onclick="openModalImage('https://lh3.googleusercontent.com/d/1KjyLrS1mhgmFZkGyeODL1kaIwT4zd8y3')" style="padding: 8px 2px; cursor: pointer; flex: 0 0 85px; border-radius: 8px;">
+                <i class="fas fa-hospital-symbol" style="color:#ea4335; font-size: 1.2rem; margin-bottom:4px;"></i>
+                <h3 style="font-size: 0.65rem; margin: 0; color:#333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ICS รพ.</h3>
+            </div>
+            <a href="https://drive.google.com/file/d/1_LfhLtn9yV9Mknzf8_oMBbL98ANcu6oa/view?usp=sharing" target="_blank" class="link-card" style="padding: 8px 2px; text-decoration:none; flex: 0 0 85px; border-radius: 8px;">
+                <i class="fas fa-fire-extinguisher" style="color:#ff5722; font-size: 1.2rem; margin-bottom:4px;"></i>
+                <h3 style="font-size: 0.65rem; margin: 0; color:#333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">แผนอัคคีภัย</h3>
+            </a>
+            <a href="https://drive.google.com/file/d/1T2yG9ycqc8pH8WI_JAPrC_TTwdmTETFk/view?usp=sharing" target="_blank" class="link-card" style="padding: 8px 2px; text-decoration:none; flex: 0 0 85px; border-radius: 8px;">
+                <i class="fas fa-biohazard" style="color:#7b1fa2; font-size: 1.2rem; margin-bottom:4px;"></i>
+                <h3 style="font-size: 0.65rem; margin: 0; color:#333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">แผนสารเคมี</h3>
+            </a>
+            <a href="https://drive.google.com/drive/folders/1KIhhUi0RuNeYOUhqEnKVn4iNLrQDXFd_" target="_blank" class="link-card" style="padding: 8px 2px; text-decoration:none; flex: 0 0 85px; border-radius: 8px;">
+                 <i class="fas fa-bullhorn" style="color:#0288d1; font-size: 1.2rem; margin-bottom:4px;"></i>
+                <h3 style="font-size: 0.65rem; margin: 0; color:#333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">One page</h3> 
+            </a>
+            <a href="https://drive.google.com/drive/folders/1vK3AE4nN-FpIH12P83z_slzKj8Azp1Ep?usp=sharing" target="_blank" class="link-card" style="padding: 8px 2px; text-decoration:none; flex: 0 0 85px; border-radius: 8px;"> 
+                <i class="fas fa-folder-open" style="color:#607d8b; font-size: 1.2rem; margin-bottom:4px;"></i>
+                <h3 style="font-size: 0.65rem; margin: 0; color:#333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">เอกสารแผนฯ</h3>
+            </a>
+        </div> 
+
+        <div class="icon-box" style="font-size: 2.5rem; margin-bottom: 5px;">⚠️</div>
+        <h1 style="font-size:1.5rem; margin: 0; text-transform: uppercase; letter-spacing: 2px;">EMERGENCY ALERT</h1>
+        <p id="emergencyMsg" style="font-size:1rem; margin-top:5px; max-width:90%; background:rgba(0,0,0,0.2); padding:5px 15px; border-radius:20px;">กรุณาอพยพออกจากพื้นที่ทันที</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; width: 95%; max-width: 1100px; justify-content: center; align-items: flex-start; margin-top: 15px;">
             
-            <input type="password" id="txtAppPassword" class="form-control" placeholder="Enter Password" style="margin-bottom:20px; text-align:center; font-size:1.2rem;">
+            <div style="flex: 1; min-width: 300px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="margin: 0 0 10px 0; font-size: 1rem; color: #fff; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 8px;">
+                    <i class="fas fa-tasks"></i> สถานะการตอบโต้เหตุ
+                </h3>
+                
+                <div id="checklistContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                
+               <div style="margin-top: 5px;">
+                    <div id="customTaskList"></div>
+
+                    <div style="margin-top: 10px; display: flex; gap: 5px;">
+                        <input type="text" id="newCustomTask" placeholder="+ เพิ่มคำสั่งการ/ภารกิจ..." style="flex:1; padding:6px; border-radius:4px; border:none; font-size:0.9rem; background:rgba(255,255,255,0.9); color:#333;">
+                        <button onclick="addNewTask()" style="background:#ff8f00; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">เพิ่ม</button>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px;">
+                
+                <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <h3 style="margin:0; font-size:1rem; color:#fff;"><i class="fas fa-history"></i> ไทม์ไลน์</h3>
+                        <button onclick="postLog()" style="background:#fff; color:#b71c1c; border:none; padding:4px 10px; border-radius:4px; font-size:0.8rem; cursor:pointer; font-weight:bold;">+ Post</button>
+                    </div>
+                    <div id="logContainer" style="height: 150px; overflow-y: auto;"></div>
+                </div>
+
+                <div style="background: rgba(46, 204, 113, 0.15); border-radius: 10px; padding: 10px; border: 1px solid rgba(46, 204, 113, 0.4);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="margin:0; font-size:1rem; color:#fff;">
+            <i class="fas fa-user-check"></i> เช็คชื่อเจ้าหน้าที่
+        </h3>
+        <div style="font-size:0.75rem; display:flex; gap:5px;">
+             <span style="background:#27ae60; color:white; padding:2px 6px; border-radius:4px;" title="รายงานตัวแล้ว">✅ <span id="countReported">0</span></span>
+             <span style="background:#c0392b; color:white; padding:2px 6px; border-radius:4px;" title="ยังไม่รายงานตัว">❌ <span id="countMissing">0</span></span>
+        </div>
+    </div>
+    
+    <div style="display:flex; gap:5px; margin-bottom:10px;">
+        <select id="selAttendName" style="flex:1; padding:6px; border-radius:4px; border:none; font-size:0.9rem; background:rgba(255,255,255,0.9); color:#333;">
+            <option value="">-- กำลังโหลดรายชื่อ... --</option>
+        </select>
+        
+        <input type="password" id="attendPin" placeholder="PIN/เบอร์ท้าย 4" style="width:100px; padding:6px; border-radius:4px; border:none; font-size:0.9rem; text-align:center; background:rgba(255,255,255,0.9); color:#333;">
+        
+        <button onclick="submitMyAttendance()" id="btnAttendSubmit" style="background:#2ecc71; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold;">
+            <i class="fas fa-check"></i>
+        </button>
+    </div>
+
+    <div style="font-size:0.8rem; color:#ddd; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.2);">รายชื่อผู้ปฏิบัติงาน (รายงานตัวแล้ว)</div>
+    <div id="attendanceList" style="height: 100px; overflow-y: auto; text-align:left;">
+        </div>
+</div>
+</div>
+        </div>
+        <br>
+    </div>
+
+    <div id="modalEmgUpload" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:11000; justify-content:center; align-items:center;">
+        <div style="background:white; width:90%; max-width:400px; padding:20px; border-radius:10px; text-align:center;">
+            <h3 style="margin-top:0; color:#333;">📎 แนบหลักฐานการปฏิบัติงาน</h3>
+            <p id="lblEmgUploadTopic" style="color:#666; font-size:0.9rem; margin-bottom:15px;">...</p>
             
-            <button type="button" class="btn-act" onclick="doAppLogin()" style="width:100%; justify-content:center; font-size:1.1rem;">
-                เข้าสู่ระบบ
-            </button>
+            <input type="hidden" id="emgUploadIndex">
+            <input type="file" id="emgFile" accept="image/*,application/pdf" style="margin-bottom:15px;">
+            
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button onclick="document.getElementById('modalEmgUpload').style.display='none'" style="padding:8px 20px; border:none; background:#eee; cursor:pointer; border-radius:5px;">ยกเลิก</button>
+                <button onclick="submitEmgUpload()" id="btnEmgUpload" style="padding:8px 20px; border:none; background:#1a73e8; color:white; cursor:pointer; border-radius:5px; font-weight:bold;">อัปโหลด</button>
+            </div>
         </div>
     </div>
 
@@ -182,9 +324,30 @@
 
     <div class="sidebar" id="sidebar">
         <div class="app-brand">
-            <h2><i class="fas fa-briefcase-medical"></i> Occ-Health <br><span style="font-size:0.9rem; color:#666;">Data Hub</span></h2>
-        </div>
+            <h2><i class="fas fa-briefcase-medical"></i> Occ-Health <br>
+            <span style="font-size:0.9rem; color:#666;">Data Hub</span></h2>
+            
+            <div style="margin-top: 8px; font-size: 0.7rem; display: flex; gap: 6px; align-items: center;">
+                
+                <a href="https://docs.google.com/document/d/1VnLoBIdXwtisYJCaPGlOhycLdvzuOY6p6ZLQZO03joA/edit?usp=sharing" target="_blank" 
+                   style="color: #0d47a1; text-decoration: none; display: flex; align-items: center; gap: 4px; background: #e3f2fd; padding: 3px 8px; border-radius: 10px; font-weight: bold; border: 1px solid #bbdefb; transition: 0.2s;">
+                    <i class="fas fa-book-reader"></i> คู่มือใช้งาน
+                </a>
+
+               <a href="#" onclick="openPrdSafely('https://docs.google.com/document/d/1Q5cC7xSz8RqaTrovTTQtkc1TVREYzm5f3wpeNfz7pE0/edit?usp=sharing')" 
+                   style="color: #444; text-decoration: none; display: flex; align-items: center; gap: 4px; background: #f5f5f5; padding: 3px 8px; border-radius: 10px; font-weight: bold; border: 1px solid #ddd; transition: 0.2s;">
+                    <i class="fas fa-user-lock"></i> Dev / PRD
+                </a>
+
+            </div>
+            </div>
         
+        <div style="margin-top: 20px; padding: 10px; background: #ffebee; border: 2px dashed #ffcdd2; border-radius: 8px; text-align: center;">
+                <div style="font-weight: bold; color: #c62828; margin-bottom: 5px;">🚨 โหมดฉุกเฉิน</div>
+                <button onclick="openEmerModal()" style="background: #c62828; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <i class="fas fa-bullhorn"></i> กดเมื่อมีเหตุฉุกเฉิน
+                </button>
+            </div>
         <div class="menu-item active" onclick="switchPage('home', this)"><i class="fas fa-home"></i> หน้าแรก</div>
         <div class="menu-item" onclick="switchPage('kpi', this)"><i class="fas fa-chart-line"></i> ติดตาม KPI</div>
         <div class="menu-item" onclick="switchPage('projects', this)"><i class="fas fa-project-diagram"></i> ติดตามโครงการ</div>
@@ -381,7 +544,7 @@
             </div>
         </div>
 
-        <div id="page-phonebook" class="page-section"><h1 style="text-align:left; margin-top:0;">📞 สมุดโทรศัพท์</h1><div class="tool-bar" style="display:flex; gap:10px; margin-bottom:20px; align-items:center;"><input type="text" class="search-box" id="searchPhone" placeholder="🔍 ค้นหาชื่อ หรือ เบอร์โทร..." onkeyup="filterPhone()" style="flex:1; margin-bottom:0;"><button class="btn-act" onclick="openContactModal()" style="width:auto; margin:0; white-space:nowrap; background:#1a73e8;"><i class="fas fa-user-plus"></i> เพิ่มรายชื่อเจ้าหน้าที่</button></div><div id="phoneLoading" style="text-align:center; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> กำลังโหลดรายชื่อ...</div><table class="contact-table"><thead><tr><th>ชื่อ-สกุล</th><th>เบอร์โทร</th><th style="width:100px;">จัดการ</th></tr></thead><tbody id="phoneList"></tbody></table></div>
+        <div id="page-phonebook" class="page-section"><h1 style="text-align:left; margin-top:0;">📞 รายชื่อเจ้าหน้าที่</h1><div class="tool-bar" style="display:flex; gap:10px; margin-bottom:20px; align-items:center;"><input type="text" class="search-box" id="searchPhone" placeholder="🔍 ค้นหาชื่อ หรือ เบอร์โทร..." onkeyup="filterPhone()" style="flex:1; margin-bottom:0;"><button class="btn-act" onclick="openContactModal()" style="width:auto; margin:0; white-space:nowrap; background:#1a73e8;"><i class="fas fa-user-plus"></i> เพิ่มรายชื่อเจ้าหน้าที่</button></div><div id="phoneLoading" style="text-align:center; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> กำลังโหลดรายชื่อ...</div><table class="contact-table"><thead><tr><th>ชื่อ-สกุล</th><th>เบอร์โทร</th><th style="width:100px;">จัดการ</th></tr></thead><tbody id="phoneList"></tbody></table></div>
     </div>
 
     <div id="modalImage" class="modal" onclick="closeModal('modalImage')">
@@ -457,7 +620,31 @@
     </div>
 
     <div id="modalUpload" class="modal"><div class="modal-content"><h3 style="margin-top:0;">📎 แนบหลักฐาน</h3><p id="uploadTaskTitle" style="color:#666; font-size:0.9rem;"></p><input type="hidden" id="uploadTaskId"><input type="hidden" id="uploadItemIndex"><input type="hidden" id="uploadMode"><input type="file" id="uFile" accept="image/*,.pdf"><div style="display:flex; gap:10px; margin-top:15px;"><button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalUpload')">ยกเลิก</button><button type="button" class="btn-act" onclick="submitUpload()">อัปโหลด</button></div></div></div>
-    <div id="modalContact" class="modal"><div class="modal-content"><h3 style="margin-top:0;" id="contactModalTitle">👤 เพิ่มรายชื่อ</h3><input type="hidden" id="cId"><label>ชื่อ-สกุล</label><input type="text" id="cName"><label>เบอร์โทรศัพท์</label><input type="tel" id="cPhone"><div style="display:flex; gap:10px; margin-top:15px;"><button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalContact')">ยกเลิก</button><button type="button" class="btn-act" onclick="saveContact()">บันทึก</button></div></div></div>
+    
+    <div id="modalContact" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0;" id="contactModalTitle">👤 เพิ่มรายชื่อ</h3>
+        <input type="hidden" id="cId">
+        
+        <label>ชื่อ-สกุล</label>
+        <input type="text" id="cName">
+        
+        <label>เบอร์โทรศัพท์</label>
+        <input type="tel" id="cPhone">
+
+        <div id="boxChangePin" style="display:none; margin-top:10px; padding:10px; background:#f1f8e9; border:1px dashed #8bc34a; border-radius:6px;">
+            <label style="color:#2e7d32; font-weight:bold;">🔐 เปลี่ยนรหัสส่วนตัว (ถ้าต้องการ)</label>
+            <input type="password" id="cNewPin" placeholder="ตั้งรหัสใหม่ (ว่างไว้ถ้าไม่เปลี่ยน)" style="margin-bottom:0;">
+            <small style="color:#666;">*ใช้สำหรับยืนยันตัวตนในครั้งต่อไป</small>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button type="button" class="btn-act" style="background:#ddd; color:#333;" onclick="closeModal('modalContact')">ยกเลิก</button>
+            <button type="button" class="btn-act" onclick="saveContact()">บันทึก</button>
+        </div>
+    </div>
+</div>
+
     <div id="modalPrintOptions" class="modal">
         <div class="modal-content" style="max-width: 450px;">
             <h3 style="margin-top:0;"><i class="fas fa-print"></i> ตัวเลือกการพิมพ์รายงาน</h3>
@@ -551,11 +738,17 @@
         let currentChecklistItems = []; let tasks = []; let projects = []; let kpis = []; let contacts = [];
         const CAT_MAP = { 'งานคลินิก': 'head-clinic', 'งานมลพิษ': 'head-pollution', 'งานอาชีวฯป้องกัน': 'head-prevent', 'งาน Check Up': 'head-checkup', 'งานอาชีวฯในโรงพยาบาล': 'head-hospital', 'ศูนย์เชี่ยวชาญฯ': 'head-center' };
         
-        //window.onload = function() { loadAllData(); loadTodayShifts(); loadInitialDocNumbers(); document.getElementById('lblMonth').innerText = new Date().toLocaleDateString('th-TH', { month: 'long' }); };
+        window.onload = function() { 
+    loadAllData(); 
+    loadTodayShifts(); 
+    loadInitialDocNumbers(); 
+    document.getElementById('lblMonth').innerText = new Date().toLocaleDateString('th-TH', { month: 'long' }); 
+};
         
         function loadTodayShifts() { google.script.run.withSuccessHandler(function(names) { document.getElementById('shiftText').innerText = "เวรวันนี้ : " + names; }).getTodayShifts(); }
         
         function loadAllData() { 
+            checkEmergencyStatus(); // <--- ✅ เพิ่มบรรทัดนี้ครับ
             document.getElementById('loading').style.display = 'block'; 
             document.getElementById('phoneLoading').style.display = 'block';
 
@@ -937,9 +1130,85 @@ function openAddTask(id, cat, mode, filterType) {
         
         function renderContacts(l) { document.getElementById('phoneList').innerHTML = l.map(c=>`<tr class="contact-row"><td>${c.name}</td><td><a href="tel:${c.phone}" style="color:#1a73e8;font-weight:bold;">${c.phone}</a></td><td class="contact-actions"><button class="btn-contact btn-edit" onclick="openContactModal('${c.id}')"><i class="fas fa-pen"></i></button><button class="btn-contact btn-delete" onclick="deleteContact('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
         function filterPhone() { let t=document.getElementById('searchPhone').value.toLowerCase(); renderContacts(contacts.filter(c=>c.name.toLowerCase().includes(t)||c.phone.includes(t))); }
-        function openContactModal(id) { document.getElementById('modalContact').style.display='flex'; if(id){let c=contacts.find(x=>x.id==id);document.getElementById('cId').value=c.id;document.getElementById('cName').value=c.name;document.getElementById('cPhone').value=c.phone;document.getElementById('contactModalTitle').innerText='✏️ แก้ไข';}else{document.getElementById('cId').value='';document.getElementById('cName').value='';document.getElementById('cPhone').value='';document.getElementById('contactModalTitle').innerText='👤 เพิ่ม';} }
-        function saveContact() { let id=document.getElementById('cId').value, n=document.getElementById('cName').value, p=document.getElementById('cPhone').value; if(!n||!p)return; google.script.run.withSuccessHandler(()=>{closeModal('modalContact');loadAllData();}).saveContactToSheet({action:id?'edit_contact':'add_contact',id:id,name:n,phone:p}); }
-        function deleteContact(id) { if(confirm('ลบ?')) google.script.run.withSuccessHandler(()=>{loadAllData();}).saveContactToSheet({action:'delete_contact',id:id}); }
+        // 1. แก้ฟังก์ชันเปิดหน้าต่าง (อยู่ด้านล่างๆ ของ Script)
+function openContactModal(id) { 
+    document.getElementById('modalContact').style.display='flex';
+    // ล้างค่าเดิมก่อน
+    document.getElementById('cNewPin').value = ''; 
+
+    if(id){
+        // --- กรณีแก้ไข ---
+        let c = contacts.find(x => x.id == id);
+        document.getElementById('cId').value = c.id;
+        document.getElementById('cName').value = c.name;
+        document.getElementById('cPhone').value = c.phone;
+        document.getElementById('contactModalTitle').innerText = '✏️ แก้ไขข้อมูล / เปลี่ยนรหัส';
+        
+        // 🔥 โชว์กล่องเปลี่ยนรหัส
+        document.getElementById('boxChangePin').style.display = 'block'; 
+    } else {
+        // --- กรณีเพิ่มใหม่ ---
+        document.getElementById('cId').value = '';
+        document.getElementById('cName').value = '';
+        document.getElementById('cPhone').value = '';
+        document.getElementById('contactModalTitle').innerText = '👤 เพิ่มรายชื่อใหม่';
+        
+        // 🔥 ซ่อนกล่องเปลี่ยนรหัส (ใช้ค่า Default ไปก่อน)
+        document.getElementById('boxChangePin').style.display = 'none';
+    } 
+}
+
+// 2. แก้ฟังก์ชันบันทึก
+function saveContact() { 
+    let id = document.getElementById('cId').value;
+    let n = document.getElementById('cName').value;
+    let p = document.getElementById('cPhone').value; 
+    // 🔥 ดึงค่ารหัสใหม่
+    let newPin = document.getElementById('cNewPin').value;
+
+    if(!n || !p) return alert('กรอกข้อมูลให้ครบ');
+
+    let pass = "";
+    if (!id) {
+        // เพิ่มใหม่ -> ถามรหัส Admin
+        pass = prompt("⛔️ (Admin Only) ใส่รหัส Admin เพื่อเพิ่มรายชื่อ:");
+        if (!pass) return;
+    } else {
+        // แก้ไข -> ถามรหัสเดิม (PIN หรือ Admin)
+        pass = prompt("🔐 ยืนยันตัวตน: ใส่รหัสเดิมของคุณ (หรือรหัส Admin):");
+        if (!pass) return;
+    }
+
+    google.script.run.withSuccessHandler((res)=>{
+        if(res == "WrongPass") {
+             alert(id ? "❌ รหัสเดิมไม่ถูกต้อง แก้ไขไม่ได้" : "❌ รหัส Admin ไม่ถูกต้อง");
+        } else {
+             closeModal('modalContact');
+             loadAllData();
+             alert("✅ บันทึกข้อมูลเรียบร้อย");
+        }
+    }).saveContactToSheet({
+        action: id ? 'edit_contact' : 'add_contact',
+        id: id,
+        name: n,
+        phone: p,
+        authPass: pass,     // รหัสสำหรับยืนยัน (รหัสเก่า/Admin)
+        newUserPin: newPin  // 🔥 รหัสใหม่ที่ต้องการตั้ง
+    }); 
+}
+       function deleteContact(id) { 
+    // ยืนยันก่อน
+    if (!confirm('ต้องการลบรายชื่อนี้ใช่หรือไม่?')) return;
+    
+    // ถามรหัส Admin
+    let pass = prompt("⛔️ กรุณาระบุรหัส Admin เพื่อยืนยันการลบ:");
+    if (!pass) return;
+
+    google.script.run.withSuccessHandler((res)=>{
+        if(res == "WrongPass") alert("❌ รหัส Admin ไม่ถูกต้อง");
+        else { loadAllData(); alert("🗑️ ลบเรียบร้อย"); }
+    }).saveContactToSheet({action:'delete_contact', id:id, authPass: pass});
+}
         // ----------------------------------------------------
       // ==========================================
         // 🖨️ ระบบพิมพ์รายงาน (V.3 ปฏิทิน + จัดคอลัมน์ใหม่)
@@ -999,249 +1268,245 @@ function openAddTask(id, cat, mode, filterType) {
             }).getReportByDateRange(sDateVal, eDateVal);
         }
 function renderPrintWindow(taskList, kpiList, projectList, dateRangeLabel, options) {
-            let printDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+    let printDate = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+    let fontStack = "'Sarabun', sans-serif";
+    
+    // ✅ ปรับขนาดฟอนต์ให้เหมาะกับแนวนอน (11pt กำลังสวย)
+    let tdStyle = 'border: 1px solid #000 !important; padding: 4px 6px; font-size: 11pt; line-height: 1.3; vertical-align: top;';
+    let ownerStyle = 'border: 1px solid #000 !important; padding: 4px 6px; font-size: 10pt; line-height: 1.2; vertical-align: middle;';
+    let thStyle = 'border: 1px solid #000 !important; padding: 6px; font-size: 11pt; font-weight: bold; background-color: #f0f0f0 !important; text-align: center; vertical-align: middle; -webkit-print-color-adjust: exact;';
 
-            // ใช้ฟอนต์ Sarabun (เพราะชัวร์สุดบนเว็บ)
-            let fontStack = "'Sarabun', sans-serif";
+    // ---------------------------------------------------------
+    // 1. ส่วนงานประจำ (Routine)
+    // ---------------------------------------------------------
+    let routineHtml = '';
+    if (options.routine) {
+        let routineRows = taskList.filter(t => t.type == 'number' || t.type == 'checklist').map((t, index) => {
+            let resultDisplay = '-', targetDisplay = '-', accumDisplay = '-';
+            let pendingDisplay = '-'; // ✅ ตัวแปรสำหรับช่องใหม่
+
+            if (t.type === 'checklist') {
+                let items = []; try { items = JSON.parse(t.progress); } catch(e) { items = []; }
+                let totalItems = items.length;
+                let completedItems = items.filter(i => i.status).length;
+                
+                // หาข้อที่ยังไม่ได้ทำ
+                let pendingItems = items.filter(i => !i.status).map(i => "• " + i.item);
+                
+                resultDisplay = totalItems > 0 ? completedItems + " ข้อ" : "0";
+                targetDisplay = totalItems > 0 ? totalItems + " ข้อ" : "-";
+                accumDisplay = "-";
+                
+                // ✅ ถ้ามีข้อที่ยังไม่ทำ ให้แสดงรายการ
+                if (pendingItems.length > 0) {
+                    pendingDisplay = `<div style="text-align:left; font-size:10pt; color:#c62828;">${pendingItems.join('<br>')}</div>`;
+                } else if (totalItems > 0) {
+                    pendingDisplay = `<span style="color:#2e7d32; font-weight:bold;">ครบถ้วน</span>`;
+                }
+
+            } else {
+                let rangeTotal = parseInt(t.range_total); if (isNaN(rangeTotal)) rangeTotal = 0;
+                let accumTotal = parseInt(t.progress); if (isNaN(accumTotal)) accumTotal = 0;
+                let target = parseInt(t.target);
+                
+                resultDisplay = rangeTotal.toLocaleString();
+                accumDisplay = accumTotal.toLocaleString();
+                targetDisplay = (!isNaN(target) && t.target !== "") ? target.toLocaleString() : "-";
+                // แบบตัวเลข ไม่ต้องแสดงอะไรในช่องสิ่งที่ต้องทำต่อ (ตามโจทย์)
+            }
+
+            return `<tr>
+                <td style="${tdStyle} text-align:center;">${index + 1}</td>
+                <td style="${tdStyle} text-align:left;">${t.title}</td>
+                <td style="${tdStyle} text-align:center;">${t.category}</td>
+                <td style="${tdStyle} text-align:center; font-weight:bold;">${resultDisplay}</td>
+                <td style="${tdStyle} text-align:center;">${targetDisplay}</td>
+                <td style="${tdStyle} text-align:center;">${pendingDisplay}</td> <td style="${tdStyle} text-align:center; background-color:#fafafa;">${accumDisplay}</td>
+            </tr>`;
+        }).join('');
+
+        routineHtml = `
+            <h4 style="font-size:14pt; margin: 15px 0 5px 0; font-weight:bold; text-align:left;">1. สรุปยอดผู้รับบริการ / ภาระงาน (Routine)</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th style="${thStyle} width:5%;">ลำดับ</th>
+                        <th style="${thStyle} width:25%;">รายการ</th>
+                        <th style="${thStyle} width:12%;">กลุ่มงาน</th>
+                        <th style="${thStyle} width:10%;">ยอดที่ได้</th>
+                        <th style="${thStyle} width:10%;">เป้าหมาย</th>
+                        <th style="${thStyle} width:28%;">สิ่งที่ต้องดำเนินการต่อ</th> <th style="${thStyle} width:10%;">ยอดสะสมรวม</th>
+                    </tr>
+                </thead>
+                <tbody>${routineRows || '<tr><td colspan="7" style="text-align:center; border:1px solid #000; padding:10px;">ไม่มีข้อมูล</td></tr>'}</tbody>
+            </table>`;
+    }
+
+    // ---------------------------------------------------------
+    // 2. ส่วนโครงการและตัวชี้วัด (Project & KPI)
+    // ---------------------------------------------------------
+    let projectHtml = '';
+    let combinedList = [];
+    if (options.project) combinedList = combinedList.concat(projectList);
+    if (options.kpi) combinedList = combinedList.concat(kpiList);
+
+    if (combinedList.length > 0) {
+        let projectRows = combinedList.map((p, index) => {
             
-            // ✅ ปรับขนาดฟอนต์ในตารางลงเหลือ 12pt (จะได้ไม่ดูใหญ่เทอะทะ)
-            let tdStyle = 'border: 1px solid #000 !important; padding: 4px 6px; font-size: 12pt; line-height: 1.3; vertical-align: top;';
-            let thStyle = 'border: 1px solid #000 !important; padding: 6px; font-size: 12pt; font-weight: bold; background-color: #f0f0f0 !important; text-align: center; vertical-align: middle; -webkit-print-color-adjust: exact;';
+            let isKPI = (p.category === 'KPI' || p.category === 'ตัวชี้วัด');
+            let typeLabel = isKPI ? 
+                '<span style="color:#c2185b; font-weight:bold;">[KPI]</span>' : 
+                '<span style="color:#1976d2; font-weight:bold;">[Pro]</span>';
 
-            // 1. Routine Section
-            let routineHtml = '';
-            if (options.routine) {
-                let routineRows = taskList.filter(t => t.type == 'number' || t.type == 'checklist').map((t, index) => {
-                    let resultDisplay = '-', targetDisplay = '-', accumDisplay = '-';
+            let resultDisplay = '-', targetDisplay = '-';
+            let pendingDisplay = '-'; // ✅ ตัวแปรสำหรับช่องใหม่
 
-                    if (t.type === 'checklist') {
-                        let items = []; try { items = JSON.parse(t.progress); } catch(e) { items = []; }
-                        let totalItems = items.length;
-                        let completedItems = items.filter(i => i.status).length;
-                        targetDisplay = totalItems > 0 ? totalItems + " ข้อ" : "-";
-                        accumDisplay = totalItems > 0 ? `เสร็จ ${completedItems} ข้อ` : "0";
-                    } else {
-                        let rangeTotal = parseInt(t.range_total); if (isNaN(rangeTotal)) rangeTotal = 0;
-                        let accumTotal = parseInt(t.progress); if (isNaN(accumTotal)) accumTotal = 0;
-                        let target = parseInt(t.target);
-                        resultDisplay = rangeTotal.toLocaleString();
-                        accumDisplay = accumTotal.toLocaleString();
-                        targetDisplay = (!isNaN(target) && t.target !== "") ? target.toLocaleString() : "-";
-                    }
+            if (p.type === 'checklist') {
+                let items = []; try { items = JSON.parse(p.progress); } catch(e) { items = []; }
+                let totalItems = items.length;
+                let completedItems = items.filter(i => i.status).length;
+                
+                // หาข้อที่ยังไม่ได้ทำ
+                let pendingItems = items.filter(i => !i.status).map(i => "• " + i.item);
 
-                    return `<tr>
-                        <td style="${tdStyle} text-align:center;">${index + 1}</td>
-                        <td style="${tdStyle} text-align:left;">${t.title}</td>
-                        <td style="${tdStyle} text-align:center;">${t.category}</td>
-                        <td style="${tdStyle} text-align:center; font-weight:bold;">${resultDisplay}</td>
-                        <td style="${tdStyle} text-align:center;">${targetDisplay}</td>
-                        <td style="${tdStyle} text-align:center; background-color:#fafafa;">${accumDisplay}</td>
-                    </tr>`;
-                }).join('');
+                targetDisplay = totalItems > 0 ? totalItems + " ขั้นตอน" : "-";
+                let pct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+                resultDisplay = `${completedItems} ขั้นตอน (${pct}%)`;
 
-                routineHtml = `
-                    <h4 style="font-size:14pt; margin: 15px 0 5px 0; font-weight:bold; text-align:left;">1. สรุปยอดผู้รับบริการ / ภาระงาน (Routine)</h4>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                        <thead>
-                            <tr>
-                                <th style="${thStyle} width:6%;">ลำดับ</th>
-                                <th style="${thStyle} width:39%;">รายการ</th>
-                                <th style="${thStyle} width:15%;">กลุ่มงาน</th>
-                                <th style="${thStyle} width:10%;">ยอดที่ได้</th>
-                                <th style="${thStyle} width:15%;">เป้าหมาย</th>
-                                <th style="${thStyle} width:15%;">ยอดสะสม</th>
-                            </tr>
-                        </thead>
-                        <tbody>${routineRows || '<tr><td colspan="6" style="text-align:center; border:1px solid #000; padding:10px;">ไม่มีข้อมูล</td></tr>'}</tbody>
-                    </table>`;
+                // ✅ แสดงรายการที่ค้าง
+                if (pendingItems.length > 0) {
+                    pendingDisplay = `<div style="text-align:left; font-size:10pt; color:#c62828;">${pendingItems.join('<br>')}</div>`;
+                } else if (totalItems > 0) {
+                    pendingDisplay = `<span style="color:#2e7d32; font-weight:bold;">ดำเนินการครบถ้วน</span>`;
+                }
+
+            } else {
+                let cur = parseInt(p.progress) || 0;
+                let target = parseInt(p.target);
+                
+                resultDisplay = cur.toLocaleString();
+                targetDisplay = (!isNaN(target) && p.target !== "") ? target.toLocaleString() : "-";
             }
 
-            // 2. Project/KPI Section
-            let projectHtml = '';
-            let combinedList = [];
-            if (options.project) combinedList = combinedList.concat(projectList);
-            if (options.kpi) combinedList = combinedList.concat(kpiList);
+            let ownerName = p.task_class || "-";
+            let assessName = p.kpi_source || "-";
 
-            if (combinedList.length > 0) {
-                let projectRows = combinedList.map((p, index) => {
-                    let pct = 0;
-                    if(p.type == 'number') {
-                        let cur = parseInt(p.progress)||0, tar = parseInt(p.target)||100;
-                        pct = Math.min(100, Math.round((cur/tar)*100));
-                    } else {
-                        try { let items = JSON.parse(p.progress); pct = items.length>0 ? Math.round((items.filter(x=>x.status).length/items.length)*100) : 0; } catch(e){}
-                    }
-                    let statusColor = pct >= 100 ? '#28a745' : (pct > 50 ? '#ffc107' : '#dc3545');
-                    let typeLabel = p.task_class.includes('ตัวชี้วัด') ? '<span style="color:#c2185b; font-weight:bold;">[KPI]</span>' : '<span style="color:#1976d2; font-weight:bold;">[Pro]</span>';
+            return `<tr>
+                <td style="${tdStyle} text-align:center;">${index + 1}</td>
+                <td style="${tdStyle} text-align:left;">${typeLabel} ${p.title}</td>
+                <td style="${ownerStyle} text-align:center;">${ownerName}</td>
+                <td style="${tdStyle} text-align:center;">${resultDisplay}</td>
+                <td style="${tdStyle} text-align:center;">${targetDisplay}</td>
+                <td style="${tdStyle} text-align:center;">${pendingDisplay}</td> <td style="${tdStyle} text-align:center;">${assessName}</td>
+            </tr>`;
+        }).join('');
 
-                    return `<tr>
-                        <td style="${tdStyle} text-align:center;">${index + 1}</td>
-                        <td style="${tdStyle} text-align:left;">${typeLabel} ${p.title}</td>
-                        <td style="${tdStyle} text-align:center;">${p.task_class.replace('ตัวชี้วัด', '').replace('โครงการ', '') || '-'}</td>
-                        <td style="${tdStyle} text-align:center;">
-                            <div style="border:1px solid #999; height:10px; width:80%; background:#e0e0e0; border-radius:4px; overflow:hidden; display:inline-block; vertical-align:middle;">
-                                <div style="width:${pct}%; height:100%; background:${statusColor};"></div>
-                            </div>
-                            <br><span style="font-size:11pt;">${pct}%</span>
-                        </td>
-                        <td style="${tdStyle} text-align:center;">${p.kpi_source || '-'}</td>
-                    </tr>`;
-                }).join('');
+        projectHtml = `
+            <h4 style="font-size:14pt; margin: 15px 0 5px 0; font-weight:bold; text-align:left;">2. ความคืบหน้าโครงการและตัวชี้วัด (Project & KPI)</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th style="${thStyle} width:5%;">ลำดับ</th>
+                        <th style="${thStyle} width:30%;">ชื่อโครงการ / ตัวชี้วัด</th>
+                        <th style="${thStyle} width:12%;">ผู้รับผิดชอบ</th>
+                        <th style="${thStyle} width:12%;">ยอดที่ได้</th>
+                        <th style="${thStyle} width:8%;">เป้าหมาย</th>
+                        <th style="${thStyle} width:23%;">สิ่งที่ต้องดำเนินการต่อ</th> <th style="${thStyle} width:10%;">การประเมิน</th>
+                    </tr>
+                </thead>
+                <tbody>${projectRows}</tbody>
+            </table>`;
+    }
 
-                projectHtml = `
-                    <h4 style="font-size:14pt; margin: 15px 0 5px 0; font-weight:bold; text-align:left;">2. ความคืบหน้าโครงการและตัวชี้วัด (Project & KPI)</h4>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                        <thead>
-                            <tr>
-                                <th style="${thStyle} width:6%;">ลำดับ</th>
-                                <th style="${thStyle} width:40%;">ชื่อโครงการ / ตัวชี้วัด</th>
-                                <th style="${thStyle} width:20%;">ผู้รับผิดชอบ</th>
-                                <th style="${thStyle} width:17%;">ความคืบหน้า</th>
-                                <th style="${thStyle} width:17%;">การประเมิน</th>
-                            </tr>
-                        </thead>
-                        <tbody>${projectRows}</tbody>
-                    </table>`;
-            }
-
-            // 3. Generate HTML
-            let printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>รายงานสรุปผลการดำเนินงาน</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-                    <style>
-                        body { font-family: ${fontStack}; background: #525659; margin: 0; padding: 20px; }
-                        
-                        .paper { 
-                            background: white; 
-                            padding: 2cm; 
-                            width: 210mm; 
-                            margin: 0 auto; 
-                            min-height: 297mm; 
-                            box-sizing: border-box; 
-                            position: relative; 
-                        }
-                        
-                        /* ✅ [แก้ข้อ 1] ไม้ตายซ่อนปุ่ม: ซ่อนทุกอย่างในโลกก่อน แล้วค่อยโชว์เฉพาะกระดาษ */
-                        @media print {
-                            body * {
-                                visibility: hidden;
-                            }
-                            .paper, .paper * {
-                                visibility: visible;
-                            }
-                            .paper {
-                                position: absolute;
-                                left: 0;
-                                top: 0;
-                                margin: 0;
-                                padding: 2cm;
-                                width: 100%;
-                                box-shadow: none;
-                            }
-                            @page {
-                                size: A4;
-                                margin: 0; 
-                            }
-                        }
-                        
-                        .toolbar { 
-                            position: fixed; top: 0; left: 0; width: 100%; 
-                            background: #323639; color: white; padding: 10px; 
-                            text-align: center; display: flex; justify-content: center; gap: 10px; 
-                            z-index: 9999; font-family: 'Sarabun', sans-serif; 
-                        }
-                        
-                        .btn-print { background: #1a73e8; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: 'Sarabun'; }
-                        .btn-close { background: #ea4335; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: 'Sarabun'; }
-                        
-                        /* ✅ [แก้ข้อ 2] จัดกึ่งกลาง: ใช้ width 100% + text-align center บังคับ */
-                        .header-container { width: 100%; text-align: center; margin-bottom: 20px; }
-                        
-                        /* ✅ [แก้ข้อ 5] ปรับขนาด Header ให้เล็กลง (18pt / 16pt) */
-                        h1 { font-size: 18pt; font-weight: bold; margin: 0 0 5px 0; line-height: 1.2; }
-                        h3 { font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.2; }
-                        .date-info { font-size: 14pt; margin-top: 5px; color:#000; font-weight: bold; }
-                        
-                        .footer { margin-top: 50px; display: flex; justify-content: space-between; text-align: center; font-size: 14pt; }
-                    </style>
-                </head>
-                <body>
-                    <div class="toolbar">
-                        <button class="btn-print" onclick="window.print()">🖨️ สั่งพิมพ์ (Print)</button>
-                        <button class="btn-close" onclick="window.close()">❌ ปิดหน้าต่าง</button>
-                    </div>
+    // ---------------------------------------------------------
+    // 3. Generate HTML
+    // ---------------------------------------------------------
+    let printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>รายงานสรุปผลการดำเนินงาน</title>
+            <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+            <style>
+                body { font-family: ${fontStack}; background: #525659; margin: 0; padding: 20px; }
+                
+                /* ✅ ตั้งค่าหน้ากระดาษเป็น แนวนอน (Landscape) */
+                .paper { 
+                    background: white; 
+                    padding: 2cm; 
+                    width: 297mm;  /* ความกว้าง A4 แนวนอน */
+                    min-height: 210mm; /* ความสูง A4 แนวนอน */
+                    margin: 0 auto; 
+                    box-sizing: border-box; 
+                    position: relative; 
+                }
+                
+                @media print {
+                    body * { visibility: hidden; }
+                    .paper, .paper * { visibility: visible; }
+                    .paper { position: absolute; left: 0; top: 0; margin: 0; padding: 1.5cm; width: 100%; box-shadow: none; }
                     
-                    <div class="paper">
-                        <div class="header-container">
-                            <h1>สรุปรายงานการปฏิบัติงาน</h1>
-                            <h3>กลุ่มงานอาชีวเวชกรรม โรงพยาบาลเฉลิมพระเกียรติฯ ระยอง</h3>
-                            <div class="date-info">${dateRangeLabel}</div>
-                            <div style="font-size:11pt; color:#666; margin-top:5px; font-weight:normal;">(วันที่พิมพ์: ${printDate})</div>
-                        </div>
+                    /* ✅ บังคับ Printer ให้เป็น Landscape */
+                    @page { size: A4 landscape; margin: 0; }
+                }
+                
+                .toolbar { position: fixed; top: 0; left: 0; width: 100%; background: #323639; color: white; padding: 10px; text-align: center; display: flex; justify-content: center; gap: 10px; z-index: 9999; font-family: 'Sarabun', sans-serif; }
+                .btn-print { background: #1a73e8; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: 'Sarabun'; }
+                .btn-close { background: #ea4335; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: 'Sarabun'; }
+                
+                .header-container { width: 100%; text-align: center; margin-bottom: 20px; }
+                h1 { font-size: 18pt; font-weight: bold; margin: 0 0 5px 0; line-height: 1.2; }
+                h3 { font-size: 16pt; font-weight: bold; margin: 0; line-height: 1.2; }
+                .date-info { font-size: 14pt; margin-top: 5px; color:#000; font-weight: bold; }
+                
+                .footer { margin-top: 50px; display: flex; justify-content: space-between; text-align: center; font-size: 14pt; }
+            </style>
+        </head>
+        <body>
+            <div class="toolbar">
+                <button class="btn-print" onclick="window.print()">🖨️ สั่งพิมพ์ (Print)</button>
+                <button class="btn-close" onclick="window.close()">❌ ปิดหน้าต่าง</button>
+            </div>
+            <div class="paper">
+                <div class="header-container">
+                    <h1>สรุปรายงานการปฏิบัติงาน</h1>
+                    <h3>กลุ่มงานอาชีวเวชกรรม โรงพยาบาลเฉลิมพระเกียรติฯ ระยอง</h3>
+                    <div class="date-info">${dateRangeLabel}</div>
+                    <div style="font-size:11pt; color:#666; margin-top:5px; font-weight:normal;">(วันที่พิมพ์: ${printDate})</div>
+                </div>
 
-                        ${routineHtml}
-                        ${projectHtml}
+                ${routineHtml}
+                ${projectHtml}
 
-                        <div class="footer">
-                            <div style="width:250px;">
-                                <br><br>......................................................<br>
-                                (......................................................)<br>
-                                ผู้รายงาน
-                            </div>
-                            <div style="width:250px;">
-                                <br><br>......................................................<br>
-                                (......................................................)<br>
-                                หัวหน้ากลุ่มงานอาชีวเวชกรรม
-                            </div>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
+                <div class="footer">
+                    <div style="width:300px;"><br><br>......................................................<br>(......................................................)<br>ผู้รายงาน</div>
+                    <div style="width:300px;"><br><br>......................................................<br>(......................................................)<br>หัวหน้ากลุ่มงานอาชีวเวชกรรม</div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
         // ฟังก์ชันวิ่งแปะป้าย "ยอดวันนี้"
         function loadTodayBadges() {
             google.script.run.withSuccessHandler(function(stats) {
-                // stats คือข้อมูล { task_id: จำนวนวันนี้ }
                 for (var id in stats) {
                     var count = stats[id];
                     if (count > 0) {
-                        // หาตำแหน่งที่จะแปะ (ผมเดาว่าแปะไว้แถวๆ ชื่อ หรือ ยอดรวม ก็ได้)
-                        // ในที่นี้เราจะพยายามหา Element ที่แสดงยอดรวม แล้วแปะต่อท้าย
-                        
-                        // วิธีที่ง่ายที่สุด: ค้นหา div ของการ์ดนั้น แล้วแทรก HTML เข้าไป
-                        // แต่วิธีนี้ต้องชัวร์ว่าเรามี ID อ้างอิง
-                        
-                        // ✨ เทคนิค: เราจะแปะลงไปใน div ที่แสดงตัวเลขยอดรวม
-                        // สมมติว่าคุณป๊อปใช้รูปแบบการแสดงผลมาตรฐาน
-                        
-                        // ลองหา Element ที่เป็นชื่อ ID input ของเรา (add_input_ไอดี) 
-                        // แล้วขยับขึ้นไปหาที่อยู่ของมันเพื่อแปะป้าย
                         var inputEl = document.getElementById('add_input_' + id);
                         if (inputEl) {
-                            // ย้อนกลับไปหา Parent (ตัวการ์ด) หรือหาที่ว่างๆ แปะ
-                            // แนะนำ: สร้าง span ID พิเศษรอไว้ในฟังก์ชัน renderTask จะดีที่สุด
-                            // แต่ถ้าเอาแบบไม่ต้องแก้ renderTask เยอะ... ใช้บรรทัดนี้ครับ 👇
-                            
                             var labelId = 'today_badge_' + id;
                             if (!document.getElementById(labelId)) {
-                                // สร้างป้ายใหม่
                                 var badge = document.createElement("div");
                                 badge.id = labelId;
                                 badge.innerHTML = '<i class="fas fa-calendar-day"></i> วันนี้: <span style="color:#2ecc71; font-weight:bold;">+' + count + '</span>';
                                 badge.style.fontSize = "0.8rem";
                                 badge.style.color = "#555";
                                 badge.style.marginTop = "5px";
-                                badge.style.textAlign = "right"; // จัดชิดขวา
-                                
-                                // แทรกเข้าไปก่อนถึงช่องใส่ยอด (Input Group)
+                                badge.style.textAlign = "right"; 
                                 inputEl.parentNode.parentNode.insertBefore(badge, inputEl.parentNode);
                             } else {
-                                // ถ้ามีป้ายอยู่แล้ว ให้อัปเดตตัวเลข
                                 document.getElementById(labelId).innerHTML = '<i class="fas fa-calendar-day"></i> วันนี้: <span style="color:#2ecc71; font-weight:bold;">+' + count + '</span>';
                             }
                         }
@@ -1249,39 +1514,601 @@ function renderPrintWindow(taskList, kpiList, projectList, dateRangeLabel, optio
                 }
             }).getTodayLogStats();
         }
-        function doAppLogin() {
-            var pass = document.getElementById('txtAppPassword').value;
-            var btn = event.target;
-            var originalText = btn.innerText;
-            
-            btn.innerText = 'กำลังตรวจสอบ...';
-            btn.disabled = true;
 
-            google.script.run.withSuccessHandler(function(isCorrect) {
-                if (isCorrect) {
-                    // 1. ถ้ารหัสถูก: ซ่อนหน้า Login
-                    document.getElementById('loginScreen').style.opacity = '0';
-                    setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; }, 500);
-                    
-                    // 2. ✅ เริ่มโหลดข้อมูลทุกอย่างตรงนี้ (ย้ายมาจาก window.onload)
-                    loadAllData(); 
-                    loadTodayShifts();
-                    loadInitialDocNumbers();
-                    document.getElementById('lblMonth').innerText = new Date().toLocaleDateString('th-TH', { month: 'long' });
-                    
-                } else {
-                    // ถ้ารหัสผิด
-                    alert("❌ รหัสผ่านไม่ถูกต้อง");
-                    document.getElementById('txtAppPassword').value = '';
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-            }).checkLoginPass(pass);
+        // ฟังก์ชันเปิดลิงก์แบบต้องใส่รหัส Admin
+        function openPrdSafely(url) {
+            var input = prompt("🔒 กรุณาใส่รหัส Admin เพื่อเข้าถึงข้อมูล:");
+            if (input) {
+                google.script.run.withSuccessHandler(function(isValid) {
+                    if (isValid) {
+                        window.open(url, '_blank');
+                    } else {
+                        alert("❌ รหัสผิดครับ! ไม่อนุญาตให้เข้าถึง");
+                    }
+                }).checkAdminPass(input);
+            }
         }
-        // เพิ่มลูกเล่น: กด Enter ในช่องรหัสได้เลย
-        document.getElementById("txtAppPassword").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") { doAppLogin(); }
-        });
+
+        // ==========================================
+        // 🚨 ระบบ Emergency (V.Sub-Menu SOP)
+        // ==========================================
+
+        // 1. กำหนดรายการ Checklist (แบบมีหัวข้อย่อยตาม SOP)
+        const EMERGENCY_STEPS = [
+            { name: "1. รับแจ้งเหตุ / รายงานผู้บริหาร", subs: [] },
+            { name: "2. ประกาศใช้แผน (Activate RESCUE-C)", subs: [] },
+            { name: "3. เปิดศูนย์ EOC / เตรียมห้องบัญชาการ", subs: [] },
+            { name: "4. ระดมพล (ICS) / กลุ่มภารกิจรายงานตัว", subs: [
+                "4.1 กลุ่มภารกิจยุทธศาสตร์ (STAG/SAT)",
+                "4.2 กลุ่มภารกิจปฏิบัติการ (Operation)",
+                "4.3 กลุ่มภารกิจกำลังบำรุง (Logistics)",
+                "4.4 กลุ่มภารกิจการเงิน (Finance)",
+                "4.5 กลุ่มภารกิจสื่อสาร (PR/Liaison)"
+            ]},
+            { name: "5. ทีมปฏิบัติการลงพื้นที่ (Medical/SRRT)", subs: [] },
+            { name: "6. สนับสนุนทรัพยากร (ยา/เวชภัณฑ์/รถ)", subs: [] },
+            { name: "7. สื่อสารความเสี่ยง / แถลงข่าว", subs: [] },
+            { name: "8. ควบคุมสถานการณ์ได้ / พิจารณายุติ", subs: [] },
+            { name: "9. ยกเลิกแผน / เฝ้าระวังสุขภาพ จนท.", subs: [] }
+        ];
+
+        // 1. เช็คสถานะ (Update V.Roll Call)
+        function checkEmergencyStatus() {
+            google.script.run.withSuccessHandler(function(state) {
+                if (state.isActive) {
+                    showEmergencyScreen(state.message);
+                    renderChecklist(state.checklist); 
+                    renderCustomTasks(state.customTasks); // ✅ วาดรายการเพิ่มเติม
+                    renderLogs(state.logs);
+                    renderAttendance(state.attendance);
+                    
+                    if(document.getElementById('selAttendName').options.length <= 1) {
+                        populateAttendanceDropdown();
+                    }
+                } else {
+                    document.getElementById('emergencyOverlay').style.display = 'none';
+                }
+            }).getEmergencyState();
+        }
+// ==========================================
+        // 🙋‍♂️ ระบบรายงานตัว (Smart Filter & Auto-Remove)
+        // ==========================================
+
+        // 1. ฟังก์ชันแสดงผล + สั่งอัปเดต Dropdown
+        function renderAttendance(reportedList) {
+            var listContainer = document.getElementById('attendanceList');
+            
+            // ถ้าหา Element ไม่เจอ (กรณีไม่ได้เปิดโหมดฉุกเฉิน) ให้จบการทำงาน
+            if(!listContainer) return;
+
+            // --- A. อัปเดตตัวเลข (มาแล้ว / ขาด) ---
+            var totalStaff = contacts ? contacts.length : 0;
+            var reportedCount = reportedList.length;
+            var missingCount = totalStaff - reportedCount;
+
+            // ใส่ตัวเลขลงในป้ายที่เราสร้างใหม่
+            var elReported = document.getElementById('countReported');
+            var elMissing = document.getElementById('countMissing');
+            if(elReported) elReported.innerText = reportedCount;
+            if(elMissing) elMissing.innerText = missingCount;
+
+            // --- B. วาดรายชื่อคนที่ "มาแล้ว" (รายการข้างล่าง) ---
+            var html = "";
+            if(reportedList.length === 0) {
+                html = "<div style='color:rgba(255,255,255,0.5); text-align:center; font-size:0.8rem; padding-top:10px;'>ยังไม่มีใครรายงานตัว</div>";
+            } else {
+                reportedList.forEach(item => {
+                    html += `
+                        <div style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:4px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:white; font-size:0.9rem;"><i class="fas fa-user-circle"></i> ${item.name}</span>
+                            <span style="color:#eee; font-size:0.75rem;">${item.time}</span>
+                        </div>
+                    `;
+                });
+            }
+            listContainer.innerHTML = html;
+
+            // --- C. อัปเดต Dropdown (กรองชื่อออก) ---
+            updateDropdownOptions(reportedList);
+        }
+
+        // 2. ฟังก์ชันกรองรายชื่อ (มาแทนที่ populateAttendanceDropdown อันเก่า)
+        function updateDropdownOptions(reportedList) {
+            var dropdown = document.getElementById('selAttendName');
+            if (!dropdown || !contacts) return;
+
+            // เก็บชื่อคนที่รายงานตัวแล้วไว้ใน Array เพื่อเทียบง่ายๆ
+            var reportedNames = reportedList.map(r => r.name);
+
+            // เก็บค่าที่ User เลือกค้างไว้ (เผื่อกำลังจะกดแล้วมันรีเฟรชพอดี)
+            var currentSelection = dropdown.value;
+
+            dropdown.innerHTML = ""; // ล้าง Dropdown เดิม
+
+            // สร้างตัวเลือกแรก
+            var defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.innerText = "-- เลือกชื่อเพื่อรายงานตัว --";
+            dropdown.appendChild(defaultOpt);
+
+            // เรียงชื่อ ก-ฮ
+            var sortedContacts = contacts.slice().sort((a,b) => a.name.localeCompare(b.name));
+
+            // วนลูปรายชื่อทั้งหมด
+            sortedContacts.forEach(c => {
+                // 🔥 เช็คว่า: ชื่อนี้ อยู่ในรายการ "มาแล้ว" หรือไม่?
+                if (!reportedNames.includes(c.name)) {
+                    // ถ้า "ยังไม่มา" -> ให้เพิ่มลง Dropdown
+                    var opt = document.createElement('option');
+                    opt.value = c.name;
+                    opt.innerText = c.name;
+                    dropdown.appendChild(opt);
+                }
+            });
+
+            // พยายามคืนค่าที่เลือกค้างไว้ (ถ้าชื่อนั้นยังไม่หายไป)
+            dropdown.value = currentSelection;
+        }
+
+        // 3. ฟังก์ชันกดส่งข้อมูล (ปรับปรุงเล็กน้อย)
+        function submitMyAttendance() {
+            var name = document.getElementById('selAttendName').value;
+            var pin = document.getElementById('attendPin').value;
+
+            if(!name) return alert("กรุณาเลือกชื่อของคุณก่อนครับ");
+            if(!pin) return alert("กรุณากรอกรหัส PIN หรือ เบอร์โทร 4 ตัวท้าย");
+            
+            var btn = document.getElementById('btnAttendSubmit');
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            google.script.run.withSuccessHandler(function(res){
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+
+                if (res === "WrongPIN") {
+                    alert("❌ รหัสไม่ถูกต้อง! (ใช้ PIN หรือ เบอร์โทร 4 ตัวท้าย)");
+                    document.getElementById('attendPin').value = ''; 
+                } else if (res === "WrongPass") {
+                     // เผื่อไว้กรณี Error อื่น
+                     alert("❌ รหัสไม่ถูกต้อง");
+                } else {
+                    // ส่งข้อมูลใหม่กลับมา -> สั่งวาดใหม่เลย
+                    renderAttendance(res);
+                    alert("✅ รายงานตัวเรียบร้อย!");
+                    document.getElementById('attendPin').value = '';
+                    document.getElementById('selAttendName').value = ""; // รีเซ็ตชื่อที่เลือก
+                }
+            }).submitEmergencyAttendance(name, pin);
+        }
+        // ------------------------------------------
+        // ส่วนจัดการ Checklist + Attachments (Update V.4)
+        // ------------------------------------------
+        
+       function renderChecklist(checklistData) {
+            var container = document.getElementById('checklistContainer');
+            if(!container) return;
+            container.innerHTML = ""; 
+
+            var globalIndex = 0; 
+            EMERGENCY_STEPS.forEach(function(step) {
+                // ... (โค้ดเดิมใน renderChecklist ก๊อปของเก่ามาวาง หรือใช้ logic เดิม) ...
+                // วาด Main Item
+                var mainIdx = globalIndex++;
+                var mainItem = checklistData ? checklistData[mainIdx] : null;
+                container.appendChild(createCheckliItem(step.name, mainIdx, mainItem, false));
+
+                // วาด Sub Items
+                if (step.subs && step.subs.length > 0) {
+                    var subContainer = document.createElement('div');
+                    subContainer.style.marginLeft = "22px"; 
+                    subContainer.style.borderLeft = "2px solid rgba(255,255,255,0.15)"; 
+                    subContainer.style.paddingLeft = "8px";
+                    step.subs.forEach(function(subName) {
+                        var subIdx = globalIndex++;
+                        var subItem = checklistData ? checklistData[subIdx] : null;
+                        subContainer.appendChild(createCheckliItem(subName, subIdx, subItem, true));
+                    });
+                    container.appendChild(subContainer);
+                }
+            });
+        }
+
+       // 2. ✅ (แก้ไข) วาดภารกิจเพิ่มเติม (วาดแค่รายการ ไม่ยุ่งกับกล่อง Input)
+        function renderCustomTasks(tasks) {
+            // เปลี่ยน ID เป็น customTaskList (วาดแค่ในส่วนรายการ)
+            var container = document.getElementById('customTaskList'); 
+            if(!container) return;
+            container.innerHTML = "";
+
+            // หัวข้อ
+            if (tasks.length > 0) {
+                var header = document.createElement('div');
+                header.innerHTML = '<hr style="border:0; border-top:1px dashed rgba(255,255,255,0.3); margin:10px 0;">' + 
+                                   '<div style="color:#ffd700; font-size:0.9rem; margin-bottom:5px;">⚡ ภารกิจสั่งการเพิ่มเติม (Ad-hoc)</div>';
+                container.appendChild(header);
+            }
+
+            // วาดรายการ
+            tasks.forEach(function(task, index) {
+                var div = document.createElement('div');
+                var bg = task.status ? "rgba(255,255,255,0.9)" : "rgba(255,215,0, 0.15)";
+                var color = task.status ? "#1b5e20" : "#ffd700";
+                var icon = task.status ? '<i class="fas fa-check-square" style="color:#2e7d32;"></i>' : '<i class="far fa-square"></i>';
+
+                div.style.cssText = `display:flex; align-items:center; background:${bg}; padding:5px 10px; border-radius:4px; margin-bottom:4px; transition:0.2s; border:1px solid rgba(255,215,0,0.3);`;
+                
+                div.innerHTML = `
+                    <div style="margin-right:8px; font-size:1.1rem; cursor:pointer;" onclick="toggleCustomTask(${index}, ${!task.status})">${icon}</div>
+                    <div style="font-size:0.95rem; color:${color}; flex:1; cursor:pointer;" onclick="toggleCustomTask(${index}, ${!task.status})">${task.name}</div>
+                    <i class="fas fa-trash-alt" onclick="removeCustomTask(${index})" style="color:#ef5350; cursor:pointer; font-size:0.8rem; margin-left:10px; opacity:0.7;" title="ลบภารกิจ"></i>
+                `;
+                container.appendChild(div);
+            });
+            
+            // ❌ ตัดส่วนสร้างกล่อง Input ออกไปเลย (เพราะเราไปทำใน HTML แล้ว)
+        }
+
+        // เพิ่มฟังก์ชันเคลียร์ค่า หลังจากกดเพิ่มแล้ว
+        function addNewTask() {
+            var input = document.getElementById('newCustomTask');
+            var val = input.value.trim();
+            if(!val) return;
+            
+            // ส่งไป Server
+            var oldText = input.value;
+            input.value = "กำลังเพิ่ม..."; 
+            input.disabled = true;
+
+            google.script.run.withSuccessHandler(function(updatedTasks){
+                renderCustomTasks(updatedTasks);
+                // ✅ เพิ่มเสร็จแล้ว เคลียร์ค่า + เปิดให้พิมต่อได้
+                input.value = ""; 
+                input.disabled = false;
+                input.focus();
+            }).addCustomTask(val);
+        }
+        // --- Logic การกดปุ่มต่างๆ ---
+
+        function toggleCustomTask(index, newStatus) {
+            google.script.run.withSuccessHandler(function(updatedTasks){
+                renderCustomTasks(updatedTasks);
+            }).updateCustomTask(index, newStatus);
+        }
+
+        // แก้ไขฟังก์ชันนี้ (เอาเรื่อง Disabled ออกไปเลย)
+        function addNewTask() {
+            var input = document.getElementById('newCustomTask');
+            var val = input.value.trim();
+            if(!val) return;
+            
+            // 1. เคลียร์ค่าทันที! (พิมพ์ต่อได้เลย ไม่ต้องรอ)
+            input.value = ""; 
+            input.focus(); // บังคับให้เคอร์เซอร์ยังอยู่ที่เดิม
+
+            // 2. ส่งข้อมูลไปหลังบ้าน (ส่งเงียบๆ)
+            google.script.run.withSuccessHandler(function(updatedTasks){
+                renderCustomTasks(updatedTasks);
+            }).addCustomTask(val);
+        }
+
+        function removeCustomTask(index) {
+            if(!confirm("ต้องการลบภารกิจนี้ใช่หรือไม่?")) return;
+            google.script.run.withSuccessHandler(function(updatedTasks){
+                renderCustomTasks(updatedTasks);
+            }).deleteCustomTask(index);
+        }
+
+        // Helper: สร้างปุ่ม + ปุ่มแนบไฟล์
+        function createCheckliItem(text, index, itemData, isSub) {
+            // แปลงข้อมูลให้เป็นมาตรฐาน (เผื่อเป็น Bool)
+            var isChecked = false;
+            var file = null;
+            
+            if (itemData && typeof itemData === 'object') {
+                isChecked = itemData.status;
+                file = itemData.file;
+            } else {
+                isChecked = !!itemData;
+            }
+
+            var div = document.createElement('div');
+            var bg = isChecked ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.1)";
+            var color = isChecked ? "#1b5e20" : "#fff";
+            var fontSize = isSub ? "0.85rem" : "0.95rem"; 
+            var fontWeight = (isChecked || !isSub) ? "bold" : "normal";
+            var icon = isChecked ? '<i class="fas fa-check-square" style="color:#2e7d32;"></i>' : '<i class="far fa-square"></i>';
+
+            // ส่วนแสดงผลไฟล์แนบ
+            var fileHtml = '';
+            if (file) {
+                fileHtml = `
+                    <div style="display:flex; align-items:center; gap:5px; margin-left:8px;">
+                        <a href="${file.url}" target="_blank" onclick="event.stopPropagation()" style="background:#e3f2fd; color:#1565c0; padding:2px 6px; border-radius:4px; font-size:0.75rem; text-decoration:none; font-weight:bold;">
+                            <i class="fas fa-paperclip"></i> ดูไฟล์
+                        </a>
+                        <i class="fas fa-times" onclick="event.stopPropagation(); deleteEmgFile(${index})" style="color:#ef5350; cursor:pointer; font-size:0.8rem;" title="ลบไฟล์"></i>
+                    </div>
+                `;
+            } else {
+                // ปุ่มกดแนบไฟล์ (สีเทาจางๆ)
+                fileHtml = `
+                    <i class="fas fa-paperclip" onclick="event.stopPropagation(); openEmgUpload(${index}, '${text}')" style="color:${isChecked?'#999':'rgba(255,255,255,0.5)'}; margin-left:8px; cursor:pointer; font-size:0.9rem;" title="แนบหลักฐาน"></i>
+                `;
+            }
+
+            div.style.cssText = `display:flex; align-items:center; justify-content:space-between; background:${bg}; padding:5px 10px; border-radius:4px; cursor:pointer; margin-bottom:4px; transition:0.2s;`;
+            
+            // คลิกที่แถบ = ติ๊กถูก (Toggle)
+            div.onclick = function() { toggleChecklist(index, !isChecked); };
+
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; flex:1;">
+                    <div style="margin-right:8px; font-size:1.1rem;">${icon}</div>
+                    <div style="font-size:${fontSize}; color:${color}; font-weight:${fontWeight};">${text}</div>
+                </div>
+                ${fileHtml}
+            `;
+            return div;
+        }
+
+        // --- ฟังก์ชันจัดการอัปโหลด ---
+        function openEmgUpload(index, title) {
+            document.getElementById('emgUploadIndex').value = index;
+            document.getElementById('lblEmgUploadTopic').innerText = title;
+            document.getElementById('emgFile').value = ''; // เคลียร์ไฟล์เก่า
+            document.getElementById('modalEmgUpload').style.display = 'flex';
+        }
+
+        function submitEmgUpload() {
+            var fileInput = document.getElementById('emgFile');
+            if(fileInput.files.length === 0) return alert("กรุณาเลือกไฟล์");
+            
+            var file = fileInput.files[0];
+            var index = document.getElementById('emgUploadIndex').value;
+            var reader = new FileReader();
+            
+            var btn = document.getElementById('btnEmgUpload');
+            btn.innerText = "กำลังอัปโหลด..."; btn.disabled = true;
+
+            reader.onload = function(e) {
+                var fileData = e.target.result.split(',')[1]; // เอาแค่ Base64
+                var payload = {
+                    index: index,
+                    fileData: fileData,
+                    fileName: file.name,
+                    mimeType: file.type
+                };
+                
+                google.script.run.withSuccessHandler(function(updatedList) {
+                    renderChecklist(updatedList);
+                    document.getElementById('modalEmgUpload').style.display = 'none';
+                    btn.innerText = "อัปโหลด"; btn.disabled = false;
+                }).uploadEmergencyEvidence(payload);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function deleteEmgFile(index) {
+            if(!confirm("ต้องการลบไฟล์แนบนี้ใช่หรือไม่?")) return;
+            google.script.run.withSuccessHandler(function(updatedList) {
+                renderChecklist(updatedList);
+            }).deleteEmergencyEvidence(index);
+        }
+        function toggleChecklist(index, newStatus) {
+            google.script.run.withSuccessHandler(function(updatedList){
+                renderChecklist(updatedList);
+            }).updateChecklist("", index, newStatus);
+        }
+        // ------------------------------------------
+        // ส่วนจัดการ Timeline (Update: มีปุ่มแก้/ลบ)
+        // ------------------------------------------
+        function renderLogs(logs) {
+            var container = document.getElementById('logContainer');
+            if(!container) return; 
+            
+            var html = "";
+            if (!logs || logs.length === 0) {
+                container.innerHTML = "<div style='color:rgba(255,255,255,0.5); text-align:center; padding-top:20px;'>ยังไม่มีรายงานความคืบหน้า</div>";
+                return;
+            }
+
+            logs.forEach(function(item, index) {
+                // จัดการตัวอักษรพิเศษกัน error
+                var safeMsg = item.msg.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                html += `
+                    <div style="margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; display:flex; justify-content:space-between; align-items:start;">
+                        <div style="flex:1; text-align:left;">
+                            <span style="background:#ffc107; color:#000; padding:1px 4px; border-radius:3px; font-size:0.75rem; font-weight:bold; margin-right:5px;">${item.time}</span>
+                            <span style="color:#fff; font-size:0.9rem;">${item.msg}</span>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-left:10px; opacity:0.8;">
+                            <i class="fas fa-pen" onclick="editLog(${index}, '${safeMsg}')" style="color:#fff; cursor:pointer; font-size:0.8rem;" title="แก้ไขข้อความ"></i>
+                            <i class="fas fa-trash" onclick="deleteLog(${index})" style="color:#ffcdd2; cursor:pointer; font-size:0.8rem;" title="ลบข้อความ"></i>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ฟังก์ชันสั่งแก้ไข (เรียกจากปุ่มปากกา)
+        function editLog(index, oldMsg) {
+            var pass = prompt("🔐 (Admin) ใส่รหัสเพื่อแก้ไขข้อความ:");
+            if (!pass) return;
+
+            var newMsg = prompt("✏️ แก้ไขข้อความ:", oldMsg);
+            if (!newMsg || newMsg === oldMsg) return; // ถ้าไม่เปลี่ยนอะไรก็จบ
+
+            google.script.run.withSuccessHandler(function(res){
+                if(res === "WrongPass") alert("❌ รหัสผิด!");
+                else renderLogs(res);
+            }).editCommanderLog(pass, index, newMsg);
+        }
+
+        // ฟังก์ชันสั่งลบ (เรียกจากปุ่มถังขยะ)
+        function deleteLog(index) {
+            var pass = prompt("🔐 (Admin) ใส่รหัสเพื่อลบข้อความ:");
+            if (!pass) return;
+
+            if(!confirm("⚠️ ยืนยันที่จะลบข้อความนี้?")) return;
+
+            google.script.run.withSuccessHandler(function(res){
+                if(res === "WrongPass") alert("❌ รหัสผิด!");
+                else renderLogs(res);
+            }).deleteCommanderLog(pass, index);
+        }
+
+        function postLog() {
+            var msg = prompt("📢 ประกาศสถานการณ์ล่าสุด (Admin Only):");
+            if (!msg) return;
+            
+            google.script.run.withSuccessHandler(function(updatedLogs){
+                renderLogs(updatedLogs);
+            }).addCommanderLog(msg);
+        }
+
+        // ------------------------------------------
+        // ส่วนแสดงผลหน้าจอหลัก
+        // ------------------------------------------
+        function showEmergencyScreen(msg) {
+            document.getElementById('emergencyMsg').innerText = msg;
+            document.getElementById('emergencyOverlay').style.display = 'flex';
+        }
+
+        function activateEmergency() {
+            var pass = prompt("🔐 ใส่รหัส Admin (9999) เพื่อประกาศภาวะฉุกเฉิน:");
+            if (!pass) return;
+            
+            var msg = prompt("ระบุข้อความแจ้งเตือน (เช่น: สารเคมีรั่วไหล):", "เกิดเหตุฉุกเฉิน! กรุณาปฏิบัติตามแผนเผชิญเหตุ");
+            if (!msg) return;
+
+            google.script.run.withSuccessHandler(function(res){
+                if(res === "Success") {
+                    alert("🚨 ประกาศแล้ว! War Room เปิดใช้งาน");
+                    checkEmergencyStatus();
+                } else {
+                    alert("รหัสผิด!");
+                }
+            }).setEmergencyState(pass, true, msg);
+        }
+
+        function deactivateEmergency() {
+            var pass = prompt("🔐 ใส่รหัส Admin เพื่อยกเลิกสถานการณ์:");
+            if (!pass) return;
+
+            google.script.run.withSuccessHandler(function(res){
+                if(res === "Success") {
+                    alert("✅ ยกเลิกสถานการณ์ฉุกเฉินแล้ว");
+                    document.getElementById('emergencyOverlay').style.display = 'none';
+                    loadAllData();
+                } else {
+                    alert("รหัสผิด!");
+                }
+            }).setEmergencyState(pass, false, "");
+        }
+
+        // ✅ สั่งให้เช็คสถานะทุกๆ 5 วินาที
+        setInterval(checkEmergencyStatus, 5000);
+        // ==========================================
+        // ⚡ ฟังก์ชันสำหรับหน้าต่างประกาศเหตุ (Modal)
+        // ==========================================
+
+        // 1. สั่งเปิดหน้าต่าง
+        function openEmerModal() {
+            // เคลียร์ค่าเก่าทิ้งก่อน
+            document.getElementById('emerEventDetail').value = "";
+            document.getElementById('modalEmergency').style.display = 'flex'; // โชว์หน้าต่าง
+            document.getElementById('emerEventDetail').focus(); // เอากระพริบไปรอที่ช่องพิมพ์
+        }
+
+        // 2. สั่งปิดหน้าต่าง (ปุ่มยกเลิก)
+        function closeEmerModal() {
+            document.getElementById('modalEmergency').style.display = 'none';
+        }
+
+        // 3. ปุ่มยืนยัน (รวมร่างข้อความ แล้วส่งเข้า War Room)
+        function confirmEmerStart() {
+            var plan = document.getElementById('emerPlanType').value;
+            var level = document.getElementById('emerLevel').value;
+            var detail = document.getElementById('emerEventDetail').value.trim();
+
+            // เช็คว่าพิมพ์รายละเอียดหรือยัง
+            if(!detail) {
+                alert("⚠️ กรุณาระบุรายละเอียดเหตุการณ์ด้วยครับ");
+                return;
+            }
+
+            // ถามรหัสผ่าน Admin ตรงนี้เลย (เพื่อความชัวร์)
+            var pass = prompt("🔒 กรุณาใส่รหัส Admin (9999) เพื่อยืนยัน:");
+            if(!pass) return; // ถ้ากด cancel ก็จบ
+
+            // รวมข้อความเป็นประโยคเดียว
+            // ตัวอย่าง: "[แผนพิทักษ์ระยอง] ระดับ 2 : ท่อก๊าซรั่วไหล"
+            var fullMessage = "[" + plan + "] " + level + " : " + detail;
+
+            // สั่งปิดหน้าต่าง
+            closeEmerModal();
+
+            // ส่งข้อมูลไปที่ Server (เรียกฟังก์ชันเดิมที่มีอยู่แล้ว)
+            // หมายเหตุ: ตรงนี้ใช้ฟังก์ชัน setEmergencyState ตัวเดิมของคุณป๊อปได้เลย
+            google.script.run.withSuccessHandler(function(res){
+                if(res == "WrongPass") {
+                    alert("❌ รหัสผ่านผิดครับ!");
+                } else {
+                    // สำเร็จ! ระบบจะเปลี่ยนเป็นสีแดงเองตามกลไกเดิม
+                    console.log("ประกาศเหตุสำเร็จ");
+                }
+            }).setEmergencyState(pass, true, fullMessage);
+        }
+
     </script>
+    <div id="modalEmergency" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:25px; border-radius:12px; width:95%; max-width:700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        
+        <div style="border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:20px;">
+            <h3 style="margin:0; color:#c0392b;"><i class="fas fa-exclamation-triangle"></i> ประกาศภาวะฉุกเฉิน</h3>
+            <p style="margin:5px 0 0 0; font-size:0.9rem; color:#666;">ระบุรายละเอียดเพื่อแจ้งเตือนทีมงาน</p>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom:15px;">
+            
+            <div style="flex:2; min-width:200px;">
+                <label style="font-weight:bold; font-size:0.9rem; color:#333;">1. ประเภทแผนฉุกเฉิน</label>
+                <select id="emerPlanType" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:5px; font-size:1rem; background:#f9f9f9; color:#333;">
+                    <option value="แผนป้องกันและบรรเทาสาธารณภัย">แผนป้องกันและบรรเทาสาธารณภัย</option>
+                    <option value="แผนพิทักษ์ระยอง">แผนพิทักษ์ระยอง</option>
+                    <option value="แผนอัคคีภัย">แผนอัคคีภัย</option>
+                    <option value="แผนรับอุบัติภัยหมู่ (RESCUE-C)">แผนรับอุบัติภัยหมู่ (RESCUE-C)</option>
+                </select>
+            </div>
+
+            <div style="flex:1; min-width:120px;">
+                <label style="font-weight:bold; font-size:0.9rem; color:#333;">2. ระดับความรุนแรง</label>
+                <select id="emerLevel" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:5px; font-size:1rem; background:#f9f9f9; color:#333;">
+                    <option value="ระดับ 1">ระดับ 1 </option>
+                    <option value="ระดับ 2">ระดับ 2 </option>
+                    <option value="ระดับ 3">ระดับ 3 </option>
+                    <option value="ระดับ 4">ระดับ 4 </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div style="margin-bottom:25px;">
+            <label style="font-weight:bold; font-size:0.9rem; color:#333;">3. รายละเอียดเหตุการณ์</label>
+            <input type="text" id="emerEventDetail" placeholder="เช่น สารเคมีรั่วไหล อาคาร 5, ไฟไหม้คลังสินค้า A" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; margin-top:5px; font-size:1rem; color:#333;">
+        </div>
+
+        <div style="text-align:right; display:flex; gap:10px; justify-content:flex-end;">
+            <button onclick="closeEmerModal()" style="padding:10px 20px; border:none; background:#ccc; color:white; border-radius:6px; cursor:pointer;">ยกเลิก</button>
+            <button onclick="confirmEmerStart()" style="padding:10px 25px; border:none; background:#c0392b; color:white; border-radius:6px; cursor:pointer; font-weight:bold; font-size:1rem;">
+                🚨 ยืนยันประกาศ
+            </button>
+        </div>
+
+    </div>
+</div>
 </body>
 </html>
